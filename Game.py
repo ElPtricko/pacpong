@@ -45,7 +45,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.pacMan.scale_x = 1.8 * (windowX / 1440)
         self.paddleLeft.scale_x = 1.2 * (windowX / 1440)
         self.paddleRight.scale_x = 1.2 * (windowX / 1440)
-        self.pacMan.scale_y = self.pacMan.scale_x # Same as ScaleX so that the pacman isn't streched
+        self.pacMan.scale_y = self.pacMan.scale_x # Same as ScaleX so that the pacman isn't stretched
         # PACMAN DO CUSTOM MOVE CLASS
 
         self.paddleRight.do(MovePaddleRight())
