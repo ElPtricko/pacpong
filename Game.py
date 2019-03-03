@@ -64,13 +64,14 @@ class GameScene(cocos.layer.ColorLayer):
         self.coll_manager.add(self.paddleLeft)
 
     def updateobj(self, dt):
+        self.coll_manager.clear()
         self.pacMan.cshape.center = eu.Vector2(*self.pacMan.position)
         self.paddleLeft.cshape.center = eu.Vector2(*self.paddleLeft.position)
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
-        self.coll_manager.clear()
         self.coll_manager.add(self.pacMan)
         self.coll_manager.add(self.paddleRight)
         self.coll_manager.add(self.paddleLeft)
+
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
             print("colliding")
 
@@ -165,8 +166,11 @@ class MainMenu(Menu):
         self.create_menu(items, shake(), shake_back())
 
     def start_game(self):
+        scene2 = Scene()
+        scene2.schedule_interval(GameScene().updateobj, 1 / 60)
+        scene2.add(on_game_start())
         director.director.run(FadeTransition(
-            on_game_start(), 1.0))
+            scene2, 1.0))
 
     def quit(self):
         pyglet.app.exit()
@@ -200,7 +204,6 @@ if __name__ == '__main__':
     director.director.window.push_handlers(keyboard)
 
     scene = Scene()
-    scene.schedule_interval(GameScene().updateobj, 1/60)
     scene.add(MainMenu(), z=1)
     scene.add(BackgroundLayer(), z=0)
 
