@@ -1,5 +1,5 @@
-import cocos
-import pyglet
+import cocos, pyglet, random, cocos.collision_model as cm,\
+    cocos.euclid as eu
 from cocos import director
 from cocos.menu import *
 from cocos.scene import Scene
@@ -10,52 +10,96 @@ from pyglet.window import key
 
 font.add_file('resources/SIMPLICITY PERSONALUSE.ttf')
 FN = 'SIMPLCITY PERSONAL USE'
-windowX = 1000
-windowY = 700
+windowX = 1440
+windowY = 900
+
+
+class Paddle(cocos.sprite.Sprite):
+    def __init__(self, image, x, side):
+        super().__init__(image)
+        self.position = x * (windowX / 1440), (windowY / 2)
+        self.velocity = (0, 0)
+        self.scale_y = 1.8 * (windowY / 900)
+        self.scale_x = 1.2 * (windowX / 1440)
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
+        if side == 'left':
+            self.do(MovePaddleLeft())
+        if side == 'right':
+            self.do(MovePaddleRight())
+
+
+class PacMan(cocos.sprite.Sprite):
+    def __init__(self, image):
+        super().__init__(image)
+        self.position = (windowX / 2), (windowY / 2)
+        self.velocity = (0, 0)
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
+        self.dx = 1.6 * (windowX / 1440)
+        self.dy = 1.6 * (windowY / 900)
+        self.scale_x = 1.8 * (windowX / 1440)
+        self.scale_y = self.scale_x
+        self.do(MoveBall())
 
 
 class GameScene(cocos.layer.ColorLayer):
-
     def __init__(self):
         super(GameScene, self).__init__(255, 255, 255, 255)
-
         label = cocos.text.RichLabel('PacPong', ((windowX / 2), (windowY - 20)), font_size=38, font_name=FN,
                                      color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.add(label)
 
         # Paddles
-        self.paddleLeft = cocos.sprite.Sprite('resources/paddle.png')
-        self.paddleLeft.position = 100 * (windowX / 1440), (windowY / 2)
-        self.paddleLeft.velocity = (0, 0)
+        self.paddleLeft = Paddle("resources/paddle.png", 100, 'left')
         self.add(self.paddleLeft, z=1)
-
-        self.paddleRight = cocos.sprite.Sprite('resources/paddle.png')
-        self.paddleRight.position = (windowX - 100 * (windowX / 1440)), (windowY / 2)
-        self.paddleRight.velocity = (0, 0)
+        self.paddleRight = Paddle("resources/paddle.png", (windowX-100), 'right')
         self.add(self.paddleRight, z=1)
 
         # PacMan
-        self.pacMan = cocos.sprite.Sprite('resources/pacman.png')
-        self.pacMan.position = (windowX / 2), (windowY / 2)
+        self.pacMan = PacMan("resources/pacman.png")
         self.add(self.pacMan, z=2)
 
-        # Object scales
-        self.paddleLeft.scale_y = 1.8 * (windowY / 900)
-        self.paddleRight.scale_y = 1.8 * (windowY / 900)
-        self.pacMan.scale_x = 1.8 * (windowX / 1440)
-        self.paddleLeft.scale_x = 1.2 * (windowX / 1440)
-        self.paddleRight.scale_x = 1.2 * (windowX / 1440)
-        self.pacMan.scale_y = self.pacMan.scale_x # Same as ScaleX so that the pacman isn't stretched
-        # PACMAN DO CUSTOM MOVE CLASS
+        self.coll_manager = cm.CollisionManagerBruteForce()
+        self.coll_manager.add(self.pacMan)
+        self.coll_manager.add(self.paddleRight)
+        self.coll_manager.add(self.paddleLeft)
 
-        self.paddleRight.do(MovePaddleRight())
-        self.paddleLeft.do(MovePaddleLeft())
+    def updateobj(self, dt):
+        self.pacMan.cshape.center = eu.Vector2(*self.pacMan.position)
+        self.paddleLeft.cshape.center = eu.Vector2(*self.paddleLeft.position)
+        self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
+        self.coll_manager.clear()
+        self.coll_manager.add(self.pacMan)
+        self.coll_manager.add(self.paddleRight)
+        self.coll_manager.add(self.paddleLeft)
+        if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
+            print("colliding")
 
-    # Move the ball
-    def move_ball(self):
-        self.pacMan.do(MoveBy((10, 10), 0.1))
-        if self.pacMan.y > windowY-110:
-            self.pacMan.do(MoveBy((10, 10)*-1, 0.1))
+
+########################
+    # Move actions #
+########################
+class MoveBall(cocos.actions.Move):
+    def step(self, dt):
+        super().step(dt)
+        self.target.y = (self.target.y + self.target.dy)
+        self.target.x = (self.target.x + self.target.dx)
+
+        if self.target.y > windowY - (70 * (windowY / 900)):
+            self.target.y = windowY - (70 * (windowY / 900))
+            self.target.dy *= -1
+        if self.target.y < (70 * (windowY / 900)):
+            self.target.y = (70 * (windowY / 900))
+            self.target.dy *= -1
+        if self.target.x > windowX:
+            self.target.x = (70 * (windowX / 900))
+            self.target.position = (windowX/2, windowY/2)
+            self.target.dx *= random.randrange(-1, 2, 2)
+            self.target.dy *= random.randrange(-1, 2, 2)
+        if self.target.x < 1:
+            self.target.x = (70 * (windowX / 900))
+            self.target.position = (windowX/2, windowY/2)
+            self.target.dx *= random.randrange(-1, 2, 2)
+            self.target.dy *= random.randrange(-1, 2, 2)
 
 
 class MovePaddleLeft(cocos.actions.Move):
@@ -156,6 +200,7 @@ if __name__ == '__main__':
     director.director.window.push_handlers(keyboard)
 
     scene = Scene()
+    scene.schedule_interval(GameScene().updateobj, 1/60)
     scene.add(MainMenu(), z=1)
     scene.add(BackgroundLayer(), z=0)
 
