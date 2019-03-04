@@ -10,21 +10,22 @@ from pyglet.window import key
 
 font.add_file('resources/SIMPLICITY PERSONALUSE.ttf')
 FN = 'SIMPLCITY PERSONAL USE'
-windowX = 1440
-windowY = 900
+windowX = 1400
+windowY = 800
 
 
 class Paddle(cocos.sprite.Sprite):
     def __init__(self, image, x, side):
         super().__init__(image)
-        self.position = x * (windowX / 1440), (windowY / 2)
         self.velocity = (0, 0)
         self.scale_y = 1.8 * (windowY / 900)
         self.scale_x = 1.2 * (windowX / 1440)
         self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
         if side == 'left':
+            self.position = x * (windowX / 1440), (windowY / 2)
             self.do(MovePaddleLeft())
         if side == 'right':
+            self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
             self.do(MovePaddleRight())
 
 
@@ -51,7 +52,7 @@ class GameScene(cocos.layer.ColorLayer):
         # Paddles
         self.paddleLeft = Paddle("resources/paddle.png", 100, 'left')
         self.add(self.paddleLeft, z=1)
-        self.paddleRight = Paddle("resources/paddle.png", (windowX-100), 'right')
+        self.paddleRight = Paddle("resources/paddle.png", 100, 'right')
         self.add(self.paddleRight, z=1)
 
         # PacMan
