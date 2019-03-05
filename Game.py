@@ -12,6 +12,11 @@ font.add_file('resources/SIMPLICITY PERSONALUSE.ttf')
 FN = 'SIMPLCITY PERSONAL USE'
 windowX = 1400
 windowY = 800
+ballpos = (0, 0)
+pl = (50, 50)
+pr = (100, 100)
+ballCollidingL = False
+ballCollidingR = False
 
 
 class Paddle(cocos.sprite.Sprite):
@@ -19,14 +24,14 @@ class Paddle(cocos.sprite.Sprite):
         super().__init__(image)
         self.velocity = (0, 0)
         self.scale_y = 1.8 * (windowY / 900)
-        self.scale_x = 1.2 * (windowX / 1440)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
+        self.scale_x = 0.8 * (windowX / 1440)
         if side == 'left':
             self.position = x * (windowX / 1440), (windowY / 2)
             self.do(MovePaddleLeft())
         if side == 'right':
             self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
             self.do(MovePaddleRight())
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
 
 
 class PacMan(cocos.sprite.Sprite):
@@ -34,9 +39,9 @@ class PacMan(cocos.sprite.Sprite):
         super().__init__(image)
         self.position = (windowX / 2), (windowY / 2)
         self.velocity = (0, 0)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
-        self.dx = 1.6 * (windowX / 1440)
-        self.dy = 1.6 * (windowY / 900)
+        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
+        self.dx = 10 * (windowX / 1440)
+        self.dy = 10 * (windowY / 900)
         self.scale_x = 1.8 * (windowX / 1440)
         self.scale_y = self.scale_x
         self.do(MoveBall())
@@ -60,21 +65,23 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.pacMan, z=2)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
-        self.coll_manager.add(self.pacMan)
-        self.coll_manager.add(self.paddleRight)
-        self.coll_manager.add(self.paddleLeft)
 
     def updateobj(self, dt):
-        self.coll_manager.clear()
+        global ballCollidingL
+        global ballCollidingR
+        self.pacMan.position = ballpos
+        self.paddleLeft.position = pl
+        self.paddleRight.position = pr
         self.pacMan.cshape.center = eu.Vector2(*self.pacMan.position)
         self.paddleLeft.cshape.center = eu.Vector2(*self.paddleLeft.position)
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
-        self.coll_manager.add(self.pacMan)
-        self.coll_manager.add(self.paddleRight)
-        self.coll_manager.add(self.paddleLeft)
 
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
-            print("colliding")
+            ballCollidingR = True
+            self.pacMan.x -= (self.paddleRight.width + 10)
+        if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
+            ballCollidingL = True
+            self.pacMan.x += (self.paddleRight.width + 10)
 
 
 ########################
@@ -85,6 +92,10 @@ class MoveBall(cocos.actions.Move):
         super().step(dt)
         self.target.y = (self.target.y + self.target.dy)
         self.target.x = (self.target.x + self.target.dx)
+        global ballpos
+        ballpos = self.target.position
+        global ballCollidingR
+        global ballCollidingL
 
         if self.target.y > windowY - (70 * (windowY / 900)):
             self.target.y = windowY - (70 * (windowY / 900))
@@ -102,6 +113,14 @@ class MoveBall(cocos.actions.Move):
             self.target.position = (windowX/2, windowY/2)
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
+        if ballCollidingL:
+            ballCollidingL = False
+            self.target.dx *= -1
+            self.target.x += 30
+        if ballCollidingR:
+            ballCollidingR = False
+            self.target.dx *= -1
+            self.target.x -= 30
 
 
 class MovePaddleLeft(cocos.actions.Move):
@@ -111,12 +130,14 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
+        global pl
+        pl = self.target.position
 
 
 class MovePaddleRight(cocos.actions.Move):
@@ -126,12 +147,14 @@ class MovePaddleRight(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
         if keyboard[key.DOWN]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
+        global pr
+        pr = self.target.position
 
 
 def on_game_start():
@@ -168,7 +191,7 @@ class MainMenu(Menu):
 
     def start_game(self):
         scene2 = Scene()
-        scene2.schedule_interval(GameScene().updateobj, 1 / 60)
+        scene2.schedule_interval(GameScene().updateobj, 1 / 16)
         scene2.add(on_game_start())
         director.director.run(FadeTransition(
             scene2, 1.0))
