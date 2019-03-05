@@ -40,8 +40,8 @@ class PacMan(cocos.sprite.Sprite):
         self.position = (windowX / 2), (windowY / 2)
         self.velocity = (0, 0)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
-        self.dx = 10 * (windowX / 1440)
-        self.dy = 10 * (windowY / 900)
+        self.dx = 3 * (windowX / 1440)
+        self.dy = 3 * (windowY / 900)
         self.scale_x = 1.8 * (windowX / 1440)
         self.scale_y = self.scale_x
         self.do(MoveBall())
@@ -78,10 +78,10 @@ class GameScene(cocos.layer.ColorLayer):
 
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
             ballCollidingR = True
-            self.pacMan.x -= (self.paddleRight.width + 10)
+            self.pacMan.x -= (self.paddleRight.width + 15)
         if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
             ballCollidingL = True
-            self.pacMan.x += (self.paddleRight.width + 10)
+            self.pacMan.x += (self.paddleRight.width + 15)
 
 
 ########################
@@ -102,13 +102,11 @@ class MoveBall(cocos.actions.Move):
             self.target.y = (70 * (windowY / 900))
             self.target.dy *= -1
 
-        if self.target.x > windowX:
-            self.target.x = (70 * (windowX / 900))
+        if self.target.x > windowX+self.target.width+1251: # if dx=1, the ball can travel 139PX in 1 second/2085=5s dx=3
             self.target.position = (windowX/2, windowY/2)
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
-        if self.target.x < 1:
-            self.target.x = (70 * (windowX / 900))
+        if self.target.x < -self.target.width-1251: # 1251=3s with dx=3
             self.target.position = (windowX/2, windowY/2)
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
@@ -130,12 +128,12 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
         global pl
         pl = self.target.position
 
