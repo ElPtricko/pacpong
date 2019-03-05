@@ -8,8 +8,8 @@ from cocos.scenes import *
 from pyglet import font
 from pyglet.window import key
 
-font.add_file('resources/SIMPLICITY PERSONALUSE.ttf')
-FN = 'SIMPLCITY PERSONAL USE'
+font.add_file('resources/Splatch.ttf')
+FN = 'Splatch'
 windowX = 1400
 windowY = 800
 ballpos = (0, 0)
@@ -50,7 +50,7 @@ class PacMan(cocos.sprite.Sprite):
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(255, 255, 255, 255)
-        label = cocos.text.RichLabel('PacPong', ((windowX / 2), (windowY - 20)), font_size=38, font_name=FN,
+        label = cocos.text.RichLabel('PACPONG', ((windowX / 2), (windowY - 40)), font_size=38, font_name=FN,
                                      color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.add(label)
 
@@ -92,10 +92,8 @@ class MoveBall(cocos.actions.Move):
         super().step(dt)
         self.target.y = (self.target.y + self.target.dy)
         self.target.x = (self.target.x + self.target.dx)
-        global ballpos
+        global ballpos, ballCollidingR, ballCollidingL
         ballpos = self.target.position
-        global ballCollidingR
-        global ballCollidingL
 
         if self.target.y > windowY - (70 * (windowY / 900)):
             self.target.y = windowY - (70 * (windowY / 900))
@@ -103,6 +101,7 @@ class MoveBall(cocos.actions.Move):
         if self.target.y < (70 * (windowY / 900)):
             self.target.y = (70 * (windowY / 900))
             self.target.dy *= -1
+
         if self.target.x > windowX:
             self.target.x = (70 * (windowX / 900))
             self.target.position = (windowX/2, windowY/2)
@@ -113,6 +112,7 @@ class MoveBall(cocos.actions.Move):
             self.target.position = (windowX/2, windowY/2)
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
+
         if ballCollidingL:
             ballCollidingL = False
             self.target.dx *= -1
@@ -171,21 +171,21 @@ def on_game_start():
 
 class MainMenu(Menu):
     def __init__(self):
-        super().__init__("PacPong")
+        super().__init__("PACPONG")
 
     # Style of menu items
-        self.font_title = {'font_name': FN, 'font_size': 100, 'color': (192, 192, 192, 255), 'anchor_y': 'center',
+        self.font_title = {'font_name': FN, 'font_size': 50, 'color': (192, 192, 192, 255), 'anchor_y': 'center',
                            'anchor_x': 'center'}
-        self.font_item = {'font_name': FN, 'font_size': 50, 'anchor_y': 'center', 'anchor_x': 'center',
+        self.font_item = {'font_name': FN, 'font_size': 30, 'anchor_y': 'center', 'anchor_x': 'center',
                           'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 70, 'anchor_y': 'center', 'anchor_x': 'center',
+        self.font_item_selected = {'font_name': FN, 'font_size': 50, 'anchor_y': 'center', 'anchor_x': 'center',
                                    'color': (255, 255, 255, 255)}
 
     # Menu items incl. functions they trigger
         items = []
-        items.append(MenuItem('Play', self.start_game))
+        items.append(MenuItem('PLAY', self.start_game))
         items[0].y = 40
-        items.append(MenuItem('Quit', self.quit))
+        items.append(MenuItem('QUIT', self.quit))
 
         self.create_menu(items, shake(), shake_back())
 
