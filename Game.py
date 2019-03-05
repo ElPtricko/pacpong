@@ -12,11 +12,13 @@ font.add_file('resources/Splatch.ttf')
 FN = 'Splatch'
 windowX = 1400
 windowY = 800
-ballpos = (0, 0)
+ballpos = (5, 0)
 pl = (50, 50)
 pr = (100, 100)
 ballCollidingL = False
 ballCollidingR = False
+pointsL = 0
+pointsR = 0
 
 
 class Paddle(cocos.sprite.Sprite):
@@ -50,9 +52,14 @@ class PacMan(cocos.sprite.Sprite):
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(255, 255, 255, 255)
-        label = cocos.text.RichLabel('PACPONG', ((windowX / 2), (windowY - 40)), font_size=38, font_name=FN,
-                                     color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        self.add(label)
+        self.label = cocos.text.RichLabel('PACPONG', ((windowX / 2), (windowY - 40)), font_size=30, font_name=FN,
+                                          color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
+        self.add(self.label)
+
+        self.pointsl = cocos.text.RichLabel('POINTS: 0', ((50*1), (windowY - 40)), font_size = 20, font_name = FN,
+                                            color = (0, 0, 0, 255), anchor_x='left', anchor_y='center')
+        self.updatetext()
+        self.add(self.pointsl)
 
         # Paddles
         self.paddleLeft = Paddle("resources/paddle.png", 100, 'left')
@@ -82,6 +89,13 @@ class GameScene(cocos.layer.ColorLayer):
         if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
             ballCollidingL = True
             self.pacMan.x += (self.paddleRight.width + 15)
+
+    def updatetext(self):
+        global pointsL, pointsR
+        if ballpos < (1, windowY):
+            pointsL += 1
+            self.pointsl.element.text = 'POINTS: ' + str(pointsL)
+            print(pointsL)
 
 
 ########################
@@ -128,12 +142,12 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 8 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -8 * (windowY / 900)), 0.01))
         global pl
         pl = self.target.position
 
@@ -158,6 +172,7 @@ class MovePaddleRight(cocos.actions.Move):
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=2, name="Game")
+    thisgamescene.schedule_interval(GameScene().updateobj, 1 / 16)
 
     return thisgamescene
 
@@ -188,11 +203,7 @@ class MainMenu(Menu):
         self.create_menu(items, shake(), shake_back())
 
     def start_game(self):
-        scene2 = Scene()
-        scene2.schedule_interval(GameScene().updateobj, 1 / 16)
-        scene2.add(on_game_start())
-        director.director.run(FadeTransition(
-            scene2, 1.0))
+        director.director.run(FadeTransition(on_game_start(), 1.0))
 
     def quit(self):
         pyglet.app.exit()
