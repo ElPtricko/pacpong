@@ -42,8 +42,8 @@ class PacMan(cocos.sprite.Sprite):
         self.position = (windowX / 2), (windowY / 2)
         self.velocity = (0, 0)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
-        self.dx = 3 * (windowX / 1440)
-        self.dy = 3 * (windowY / 900)
+        self.dx = 15 * (windowX / 1440)
+        self.dy = 15 * (windowY / 900)
         self.scale_x = 1.8 * (windowX / 1440)
         self.scale_y = self.scale_x
         self.do(MoveBall())
@@ -56,10 +56,14 @@ class GameScene(cocos.layer.ColorLayer):
                                           color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.add(self.label)
 
-        self.pointsl = cocos.text.RichLabel('POINTS: 0', ((50*1), (windowY - 40)), font_size = 20, font_name = FN,
-                                            color = (0, 0, 0, 255), anchor_x='left', anchor_y='center')
-        self.updatetext()
+        self.pointsl = cocos.text.Label('POINTS: 0', ((windowX-50*1), (windowY - 40)), font_size=20, font_name=FN,
+                                        color=(0, 0, 0, 255), anchor_x='right', anchor_y='center')
+        self.pointsl.do(PointslAction())
         self.add(self.pointsl)
+        self.pointsr = cocos.text.Label('POINTS: 0',((50 * 1),(windowY - 40)),font_size=20,font_name=FN,
+                                       color=(0,0,0,255),anchor_x='left',anchor_y='center')
+        self.pointsr.do(PointsrAction())
+        self.add(self.pointsr)
 
         # Paddles
         self.paddleLeft = Paddle("resources/paddle.png", 100, 'left')
@@ -74,8 +78,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.coll_manager = cm.CollisionManagerBruteForce()
 
     def updateobj(self, dt):
-        global ballCollidingL
-        global ballCollidingR
+        global ballCollidingL, ballCollidingR
         self.pacMan.position = ballpos
         self.paddleLeft.position = pl
         self.paddleRight.position = pr
@@ -90,23 +93,28 @@ class GameScene(cocos.layer.ColorLayer):
             ballCollidingL = True
             self.pacMan.x += (self.paddleRight.width + 15)
 
-    def updatetext(self):
-        global pointsL, pointsR
-        if ballpos < (1, windowY):
-            pointsL += 1
-            self.pointsl.element.text = 'POINTS: ' + str(pointsL)
-            print(pointsL)
-
 
 ########################
     # Move actions #
 ########################
+class PointslAction(cocos.actions.Action):
+    def step(self, dt):
+        super().step(dt)
+        self.target.element.text = 'POINTS: %d' % pointsL
+
+
+class PointsrAction(cocos.actions.Action):
+    def step(self, dt):
+        super().step(dt)
+        self.target.element.text = 'POINTS: %d' % pointsR
+
+
 class MoveBall(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
         self.target.y = (self.target.y + self.target.dy)
         self.target.x = (self.target.x + self.target.dx)
-        global ballpos, ballCollidingR, ballCollidingL
+        global ballpos, ballCollidingR, ballCollidingL, pointsL, pointsR
         ballpos = self.target.position
 
         if self.target.y > windowY - (70 * (windowY / 900)):
@@ -116,11 +124,16 @@ class MoveBall(cocos.actions.Move):
             self.target.y = (70 * (windowY / 900))
             self.target.dy *= -1
 
-        if self.target.x > windowX+self.target.width+1251: # if dx=1, the ball can travel 139PX in 1 second/2085=5s dx=3
-            self.target.position = (windowX/2, windowY/2)
+        if 0 - self.target.width < self.target.x < -self.target.width -1 + (1*abs(self.target.dx)):
+            pointsL += 1
+        if windowX + self.target.width < self.target.x < windowX + self.target.width + (1*abs(self.target.dx)):
+            pointsR += 1
+
+        if self.target.x > windowX+self.target.width+(1251*(windowX/1400)): # if dx=1, the ball can travel
+            self.target.position = (windowX/2, windowY/2)                   # 139PX in 1 second/2085=5s dx=3
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
-        if self.target.x < -self.target.width-1251: # 1251=3s with dx=3
+        if self.target.x < -self.target.width-(1251*(windowX/1400)): # 1251=3s with dx=3
             self.target.position = (windowX/2, windowY/2)
             self.target.dx *= random.randrange(-1, 2, 2)
             self.target.dy *= random.randrange(-1, 2, 2)
@@ -142,12 +155,12 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -8 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
         global pl
         pl = self.target.position
 
