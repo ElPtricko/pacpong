@@ -10,14 +10,14 @@ from pyglet.window import key
 
 font.add_file('resources/Splatch.ttf')
 FN = 'Splatch'
-windowX = 1400
-windowY = 800
+windowX = 1920
+windowY = 1080
 ballpos = (5, 0)
-pl = (50, 50)
-pr = (100, 100)
+pl = (500, 500)
+pr = (1000, 1000)
 ballCollidingL = False
 ballCollidingR = False
-pointsL = 0
+pointsL = -1
 pointsR = 0
 
 
@@ -39,29 +39,32 @@ class Paddle(cocos.sprite.Sprite):
 class PacMan(cocos.sprite.Sprite):
     def __init__(self, image):
         super().__init__(image)
-        self.position = (windowX / 2), (windowY / 2)
         self.velocity = (0, 0)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
-        self.dx = 15 * (windowX / 1440)
-        self.dy = 15 * (windowY / 900)
-        self.scale_x = 1.8 * (windowX / 1440)
+        self.scale_x = 0.5 * (windowX/1440)
         self.scale_y = self.scale_x
+        self.dx = (6 * (windowX/1440))
+        self.dy = (6 * (windowY/900))
+        self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
+        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
         self.do(MoveBall())
+        self.do(Repeat(RotateBy(360, 0.6)))
 
 
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(255, 255, 255, 255)
-        self.label = cocos.text.RichLabel('PACPONG', ((windowX / 2), (windowY - 40)), font_size=30, font_name=FN,
+        hits = cocos.text.RichLabel('TOTAL HITS: 0', ((windowX / 2), (windowY - 40)), font_size=20, font_name=FN,
                                           color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        self.add(self.label)
+        hits.do(BallCollisions())
+        self.add(hits)
 
-        self.pointsl = cocos.text.Label('POINTS: 0', ((windowX-50*1), (windowY - 40)), font_size=20, font_name=FN,
-                                        color=(0, 0, 0, 255), anchor_x='right', anchor_y='center')
+        self.pointsl = cocos.text.Label('POINTS: 0', ((50*(windowX/1440)), (windowY - 40)), font_size=20, font_name=FN,
+                                        color=(0, 0, 0, 255), anchor_x='left', anchor_y='center')
         self.pointsl.do(PointslAction())
         self.add(self.pointsl)
-        self.pointsr = cocos.text.Label('POINTS: 0',((50 * 1),(windowY - 40)),font_size=20,font_name=FN,
-                                       color=(0,0,0,255),anchor_x='left',anchor_y='center')
+
+        self.pointsr = cocos.text.Label('POINTS: 0', ((windowX-50*(windowX/1440)), (windowY - 40)), font_size=20,
+                                        font_name=FN, color=(0, 0, 0, 255), anchor_x='right', anchor_y='center')
         self.pointsr.do(PointsrAction())
         self.add(self.pointsr)
 
@@ -72,8 +75,8 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.paddleRight, z=1)
 
         # PacMan
-        self.pacMan = PacMan("resources/pacman.png")
-        self.add(self.pacMan, z=2)
+        self.pacMan = PacMan("resources/pacball.png")
+        self.add(self.pacMan)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
 
@@ -88,10 +91,10 @@ class GameScene(cocos.layer.ColorLayer):
 
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
             ballCollidingR = True
-            self.pacMan.x -= (self.paddleRight.width + 15)
+            self.pacMan.x -= self.paddleRight.width
         if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
             ballCollidingL = True
-            self.pacMan.x += (self.paddleRight.width + 15)
+            self.pacMan.x += self.paddleRight.width
 
 
 ########################
@@ -109,12 +112,20 @@ class PointsrAction(cocos.actions.Action):
         self.target.element.text = 'POINTS: %d' % pointsR
 
 
+class BallCollisions(cocos.actions.Action):
+    def step(self, dt):
+        super().step(dt)
+        newhits = int(self.target.element.text.split()[2]) + 1
+        if ballCollidingR or ballCollidingL:
+            self.target.element.text = 'TOTAL HITS: %d' % newhits
+
+
 class MoveBall(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
+        global ballpos, ballCollidingR, ballCollidingL, pointsL, pointsR
         self.target.y = (self.target.y + self.target.dy)
         self.target.x = (self.target.x + self.target.dx)
-        global ballpos, ballCollidingR, ballCollidingL, pointsL, pointsR
         ballpos = self.target.position
 
         if self.target.y > windowY - (70 * (windowY / 900)):
@@ -124,18 +135,18 @@ class MoveBall(cocos.actions.Move):
             self.target.y = (70 * (windowY / 900))
             self.target.dy *= -1
 
-        if 0 - self.target.width < self.target.x < -self.target.width -1 + (1*abs(self.target.dx)):
-            pointsL += 1
-        if windowX + self.target.width < self.target.x < windowX + self.target.width + (1*abs(self.target.dx)):
+        if -self.target.width > self.target.x > (-abs(self.target.dx))-self.target.width:
             pointsR += 1
+        if windowX+self.target.width < self.target.x < abs(self.target.dx)+windowX+self.target.width:
+            pointsL += 1
 
-        if self.target.x > windowX+self.target.width+(1251*(windowX/1400)): # if dx=1, the ball can travel
+        if self.target.x > windowX+self.target.width+(1251*(windowX/1440)): # if dx=1, the ball can travel
             self.target.position = (windowX/2, windowY/2)                   # 139PX in 1 second/2085=5s dx=3
-            self.target.dx *= random.randrange(-1, 2, 2)
+            self.target.dx *= -1
             self.target.dy *= random.randrange(-1, 2, 2)
-        if self.target.x < -self.target.width-(1251*(windowX/1400)): # 1251=3s with dx=3
+        if self.target.x < -self.target.width-(1251*(windowX/1440)): # 1251=3s with dx=3
             self.target.position = (windowX/2, windowY/2)
-            self.target.dx *= random.randrange(-1, 2, 2)
+            self.target.dx *= -1
             self.target.dy *= random.randrange(-1, 2, 2)
 
         if ballCollidingL:
@@ -155,12 +166,12 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
         global pl
         pl = self.target.position
 
@@ -172,20 +183,21 @@ class MovePaddleRight(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
         if keyboard[key.DOWN]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
         global pr
         pr = self.target.position
 
 
+# Used for starting the game
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=2, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, 1 / 16)
+    thisgamescene.schedule_interval(GameScene().updateobj, 1/60)
 
     return thisgamescene
 
@@ -216,7 +228,7 @@ class MainMenu(Menu):
         self.create_menu(items, shake(), shake_back())
 
     def start_game(self):
-        director.director.run(FadeTransition(on_game_start(), 1.0))
+        director.director.run(FadeTransition(on_game_start(), 1))
 
     def quit(self):
         pyglet.app.exit()
@@ -232,7 +244,7 @@ class BackgroundLayer(cocos.layer.Layer):
         super().__init__()
         bg = cocos.sprite.Sprite(pyglet.image.load_animation('resources/bg.gif'))
         bg.scale = 1.2 * ((windowX+windowY) / (1440+900))
-        bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY / 2)
+        bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY/2)
         self.add(bg)
 
 
