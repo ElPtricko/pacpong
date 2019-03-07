@@ -10,8 +10,8 @@ from pyglet.window import key
 
 font.add_file('resources/Splatch.ttf')
 FN = 'Splatch'
-windowX = 1920
-windowY = 1080
+windowX = 1440
+windowY = 900
 ballpos = (5, 0)
 pl = (500, 500)
 pr = (1000, 1000)
@@ -40,21 +40,22 @@ class PacMan(cocos.sprite.Sprite):
     def __init__(self, image):
         super().__init__(image)
         self.velocity = (0, 0)
-        self.scale_x = 0.5 * (windowX/1440)
+        self.scale_x = 0.6 * (windowX/1440)
         self.scale_y = self.scale_x
-        self.dx = (6 * (windowX/1440))
-        self.dy = (6 * (windowY/900))
+        self.dx = (12 * (windowX/1440))
+        self.dy = (12 * (windowY/900))
         self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
         self.do(MoveBall())
-        self.do(Repeat(RotateBy(360, 0.6)))
+        self.do(Repeat(RotateBy(25, 0.07) + RotateBy(-50, 0.14) + RotateBy(25, 0.07)))
 
 
 class GameScene(cocos.layer.ColorLayer):
+
     def __init__(self):
-        super(GameScene, self).__init__(255, 255, 255, 255)
+        super(GameScene, self).__init__(70, 125, 225, 255)
         hits = cocos.text.RichLabel('TOTAL HITS: 0', ((windowX / 2), (windowY - 40)), font_size=20, font_name=FN,
-                                          color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
+                                    color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         hits.do(BallCollisions())
         self.add(hits)
 
@@ -75,7 +76,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.paddleRight, z=1)
 
         # PacMan
-        self.pacMan = PacMan("resources/pacball.png")
+        self.pacMan = PacMan("resources/ghost.png")
         self.add(self.pacMan)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
@@ -91,10 +92,10 @@ class GameScene(cocos.layer.ColorLayer):
 
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
             ballCollidingR = True
-            self.pacMan.x -= self.paddleRight.width
+            self.pacMan.x -= self.paddleRight.width + 50
         if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
             ballCollidingL = True
-            self.pacMan.x += self.paddleRight.width
+            self.pacMan.x += self.paddleRight.width + 50
 
 
 ########################
@@ -183,12 +184,12 @@ class MovePaddleRight(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
         if keyboard[key.DOWN]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
         global pr
         pr = self.target.position
 
@@ -197,16 +198,13 @@ class MovePaddleRight(cocos.actions.Move):
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=2, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, 1/60)
-
+    thisgamescene.schedule_interval(GameScene().updateobj, 1/16)
     return thisgamescene
 
 
 ##########################
     # MAIN MENU #
 ##########################
-
-
 class MainMenu(Menu):
     def __init__(self):
         super().__init__("PACPONG")
@@ -233,10 +231,6 @@ class MainMenu(Menu):
     def quit(self):
         pyglet.app.exit()
 
-    def on_key_press(self, symbol, modifiers):
-        if symbol is 'ESC':
-            pyglet.app.exit()
-
 
 # Centered background capable of handling animations #
 class BackgroundLayer(cocos.layer.Layer):
@@ -260,9 +254,7 @@ if __name__ == '__main__':
     director.director.window.pop_handlers()
     keyboard = key.KeyStateHandler()
     director.director.window.push_handlers(keyboard)
-
     scene = Scene()
     scene.add(MainMenu(), z=1)
     scene.add(BackgroundLayer(), z=0)
-
     director.director.run(scene)
