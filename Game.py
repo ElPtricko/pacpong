@@ -1,3 +1,5 @@
+import tkinter
+
 import cocos, pyglet, random, cocos.collision_model as cm,\
     cocos.euclid as eu
 from cocos import director
@@ -10,8 +12,8 @@ from pyglet.window import key
 
 font.add_file('resources/Splatch.ttf')
 FN = 'Splatch'
-windowX = 1440
-windowY = 900
+windowX = tkinter.Tk().winfo_screenwidth()
+windowY = tkinter.Tk().winfo_screenheight()
 ballpos = (5, 0)
 pl = (500, 500)
 pr = (1000, 1000)
@@ -40,20 +42,21 @@ class PacMan(cocos.sprite.Sprite):
     def __init__(self, image):
         super().__init__(image)
         self.velocity = (0, 0)
+        self.color = (255, 255, 0)
         self.scale_x = 0.6 * (windowX/1440)
         self.scale_y = self.scale_x
-        self.dx = (12 * (windowX/1440))
-        self.dy = (12 * (windowY/900))
+        self.dx = (14.4 * (windowX/1440))
+        self.dy = (14.4 * (windowY/900))
         self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
         self.do(MoveBall())
-        self.do(Repeat(RotateBy(25, 0.07) + RotateBy(-50, 0.14) + RotateBy(25, 0.07)))
+        self.do(Repeat(RotateBy(20, 0.05) + RotateBy(-40, 0.1) + RotateBy(20, 0.05)))
 
 
 class GameScene(cocos.layer.ColorLayer):
 
     def __init__(self):
-        super(GameScene, self).__init__(70, 125, 225, 255)
+        super(GameScene, self).__init__(70, 100, 175, 255)
         hits = cocos.text.RichLabel('TOTAL HITS: 0', ((windowX / 2), (windowY - 40)), font_size=20, font_name=FN,
                                     color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         hits.do(BallCollisions())
@@ -92,10 +95,10 @@ class GameScene(cocos.layer.ColorLayer):
 
         if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
             ballCollidingR = True
-            self.pacMan.x -= self.paddleRight.width + 50
+            self.pacMan.x -= self.paddleRight.width + self.pacMan.dx + 50
         if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
             ballCollidingL = True
-            self.pacMan.x += self.paddleRight.width + 50
+            self.pacMan.x += self.paddleRight.width + self.pacMan.dx + 50
 
 
 ########################
@@ -167,12 +170,12 @@ class MovePaddleLeft(cocos.actions.Move):
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
-                self.target.do(MoveBy((0, 10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, 15 * (windowY / 900)), 0.01))
         if keyboard[key.S]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
-                self.target.do(MoveBy((0, -10 * (windowY / 900)), 0.01))
+                self.target.do(MoveBy((0, -15 * (windowY / 900)), 0.01))
         global pl
         pl = self.target.position
 
@@ -198,7 +201,7 @@ class MovePaddleRight(cocos.actions.Move):
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=2, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, 1/16)
+    thisgamescene.schedule_interval(GameScene().updateobj, 1/25)
     return thisgamescene
 
 
@@ -231,6 +234,9 @@ class MainMenu(Menu):
     def quit(self):
         pyglet.app.exit()
 
+    def on_quit(self):
+        pass
+
 
 # Centered background capable of handling animations #
 class BackgroundLayer(cocos.layer.Layer):
@@ -249,7 +255,7 @@ class BackgroundLayer(cocos.layer.Layer):
 if __name__ == '__main__':
 
     director.director.init(width=windowX, height=windowY, caption="PacPong",
-                           # fullscreen=True
+                           fullscreen=True
                            )
     director.director.window.pop_handlers()
     keyboard = key.KeyStateHandler()
