@@ -1,7 +1,5 @@
-import tkinter
-
 import cocos, pyglet, random, cocos.collision_model as cm,\
-    cocos.euclid as eu
+    cocos.euclid as eu, tkinter
 from cocos import director
 from cocos.menu import *
 from cocos.scene import Scene
