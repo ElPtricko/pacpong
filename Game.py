@@ -10,13 +10,13 @@ from glvars import *
 
 
 class Paddle(cocos.sprite.Sprite):
-    def __init__(self, image, x, side):
+    def __init__(self, image, side):
         super().__init__(image)
         self.velocity = (0, 0)
         self.scale_y = 1.8 * (windowY / 900)
         self.scale_x = 0.8 * (windowX / 1440)
         if side == 'left':
-            self.position = x * (windowX / 1440), (windowY / 2)
+            self.position = 100 * (windowX / 1440), (windowY / 2)
             self.do(MovePaddleLeft())
         if side == 'right':
             self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
@@ -24,13 +24,12 @@ class Paddle(cocos.sprite.Sprite):
         self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
 
 
-class PacMan(cocos.sprite.Sprite):
+class GhostBall(cocos.sprite.Sprite):
     def __init__(self, image):
         super().__init__(image)
         self.velocity = (0, 0)
-        self.color = (255, 255, 0)
-        self.scale_x = 0.6 * (windowX/1440)
-        self.scale_y = self.scale_x
+        self.scale_x = self.scale_y = 0.6 * (windowX/1440)
+        self.color = (100, 255, 0)
         self.dx = (14.4 * (windowX/1440)) / (displayfrequency/60)
         self.dy = (14.4 * (windowY/900)) / (displayfrequency/60)
         self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
@@ -39,21 +38,42 @@ class PacMan(cocos.sprite.Sprite):
         self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
 
 
+class PacBall(cocos.sprite.Sprite):
+    def __init__(self, image, color, side):
+        super().__init__(image)
+        self.velocity = (0, 0)
+        self.scale_x = self.scale_y = 0.5 * (windowX/1440)
+        self.color = color
+        if side is 'left':
+            self.position = (windowX/4), (windowY/2)
+            self.do(MovePacl())
+        if side is 'right':
+            self.scale_x *= -1
+            self.position = ((windowX/4)*3, windowY/2)
+            self.do(MovePacr())
+        self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
+        self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
+
+
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(70, 100, 175, 255)
-        hits = cocos.text.RichLabel('TOTAL HITS: 0', ((windowX / 2), (windowY - 40)),
-                                    font_size=16*((windowX+windowY) / (1440+900)), font_name=FN, color=(0, 0, 0, 255),
-                                    anchor_x='center', anchor_y='center')
-        hits.do(BallCollisions())
-        self.add(hits)
-
+        # Pointing system
+        hpl = cocos.text.RichLabel('PacMan HP: 200', ((windowX / 2)-(200*windowX/1440), (windowY - 40)),
+                                   font_size=16*((windowX+windowY) / (1440+900)), font_name=FN, color=(0, 0, 0, 255),
+                                   anchor_x='right', anchor_y='center')
+        hpl.do(HpCounterL())
+        self.add(hpl)
+        hpr = cocos.text.RichLabel('PacMan HP: 200', ((windowX / 2) + (200 * windowX / 1440), (windowY - 40)),
+                                   font_size=16*((windowX+windowY) / (1440+900)), font_name=FN, color=(0, 0, 0, 255),
+                                   anchor_x='left', anchor_y='center')
+        hpr.do(HpCounterR())
+        self.add(hpr)
         self.pointsl = cocos.text.Label('POINTS: 0', ((120*(windowX/1440)), (windowY - 40)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.pointsl.do(PointslAction())
         self.add(self.pointsl)
-
         self.pointsr = cocos.text.Label('POINTS: 0', ((windowX-120*(windowX/1440)), (windowY - 40)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
@@ -68,31 +88,57 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.pointsr)
 
         # Paddles
-        self.paddleLeft = Paddle("resources/paddle.png", 100, 'left')
+        self.paddleLeft = Paddle("resources/paddle.png", 'left')
         self.add(self.paddleLeft, z=1)
-        self.paddleRight = Paddle("resources/paddle.png", 100, 'right')
+        self.paddleRight = Paddle("resources/paddle.png", 'right')
         self.add(self.paddleRight, z=1)
 
-        # PacMan
-        self.pacMan = PacMan("resources/ghost.png")
-        self.add(self.pacMan)
+        # Ghost Ball
+        self.GhostBall = GhostBall("resources/ghost.png")
+        self.add(self.GhostBall)
+        # Pac ball
+        self.pacleft = PacBall("resources/pacball.png", (255, 0, 0), 'left')
+        self.add(self.pacleft)
+        self.pacright = PacBall("resources/pacball.png", (200, 200, 200), 'right')
+        self.add(self.pacright)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
 
     def updateobj(self, dt):
-        global ballCollidingL, ballCollidingR
-        self.pacMan.position = ballpos
+        global ballCollidingL, ballCollidingR, paclhp, pacrhp
+        self.GhostBall.position = ballpos
         self.paddleLeft.position = pl
         self.paddleRight.position = pr
-        self.pacMan.cshape.center = eu.Vector2(*self.pacMan.position)
+        self.pacright.position = pacr
+        self.pacleft.position = pacl
+
+        self.GhostBall.cshape.center = eu.Vector2(*self.GhostBall.position)
         self.paddleLeft.cshape.center = eu.Vector2(*self.paddleLeft.position)
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
-        if self.coll_manager.they_collide(self.pacMan, self.paddleRight):
+        self.pacleft.cshape.center = eu.Vector2(*self.pacleft.position)
+        self.pacright.cshape.center = eu.Vector2(*self.pacright.position)
+
+        if self.coll_manager.they_collide(self.GhostBall, self.paddleRight):
             ballCollidingR = True
-            self.pacMan.x -= self.paddleRight.width + self.pacMan.dx + 50
-        if self.coll_manager.they_collide(self.pacMan, self.paddleLeft):
+            self.GhostBall.x -= self.paddleRight.width + self.GhostBall.dx + 50
+        if self.coll_manager.they_collide(self.GhostBall, self.paddleLeft):
             ballCollidingL = True
-            self.pacMan.x += self.paddleRight.width + self.pacMan.dx + 50
+            self.GhostBall.x += self.paddleRight.width + self.GhostBall.dx + 50
+
+        if self.coll_manager.they_collide(self.pacleft, self.GhostBall):
+            self.GhostBall.x -= self.pacleft.width + 10
+            print(paclhp)
+            if paclhp == 0:
+                pass
+            else:
+                paclhp -= 50
+            print(paclhp)
+        if self.coll_manager.they_collide(self.pacright, self.GhostBall):
+            self.GhostBall.x += self.pacleft.width + 10
+            if pacrhp == 0:
+                pass
+            else:
+                pacrhp -= 50
 
 
 ########################
@@ -130,12 +176,14 @@ class PointsrAction(cocos.actions.Action):
                            MoveBy((135 * (windowX / 1440), 0), 0.3))
 
 
-class BallCollisions(cocos.actions.Action):
+class HpCounterL(cocos.actions.Action):
     def step(self, dt):
-        super().step(dt)
-        newhits = int(self.target.element.text.split()[2]) + 1
-        if ballCollidingR or ballCollidingL:
-            self.target.element.text = 'TOTAL HITS: %d' % newhits
+        self.target.element.text = 'PacMan HP: %d' % paclhp
+
+
+class HpCounterR(cocos.actions.Action):
+    def step(self, dt):
+        self.target.element.text = 'PacMan HP: %d' % pacrhp
 
 
 class MoveBall(cocos.actions.Move):
@@ -183,13 +231,13 @@ class MoveBall(cocos.actions.Move):
 class MovePaddleLeft(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
-        if keyboard[key.W]:
+        if keyboard[key.Q]:
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
                 self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency/60)),
                                       0.01 / (displayfrequency/60)))
-        if keyboard[key.S]:
+        if keyboard[key.E]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
@@ -202,13 +250,13 @@ class MovePaddleLeft(cocos.actions.Move):
 class MovePaddleRight(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
-        if keyboard[key.UP]:
+        if keyboard[key.U]:
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
                 self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency/60)),
                                       0.01 / (displayfrequency/60)))
-        if keyboard[key.DOWN]:
+        if keyboard[key.O]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
@@ -218,10 +266,72 @@ class MovePaddleRight(cocos.actions.Move):
         pr = self.target.position
 
 
+class MovePacl(cocos.actions.Move):
+    def step(self, dt):
+        super().step(dt)
+        if keyboard[key.W]:
+            if self.target.y >= windowY - (200 * (windowY / 900)):
+                self.target.y = windowY - (200 * (windowY / 900))
+            else:
+                self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency/60)),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.S]:
+            if self.target.y <= (200 * (windowY / 900)):
+                self.target.y = 200 * (windowY / 900)
+            else:
+                self.target.do(MoveBy((0, (-10 * (windowY / 900)) / (displayfrequency/60)),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.D]:
+            if self.target.x >= windowX/2 - (70*windowX/1440):
+                self.target.x = windowX/2 - (70*windowX/1440)
+            else:
+                self.target.do(MoveBy(((10 * (windowX / 1440)) / (displayfrequency/60), 0),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.A]:
+            if self.target.x <= 200 * (windowX / 1440):
+                self.target.x = 200 * (windowX / 1440)
+            else:
+                self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency / 60),0),
+                                      0.01 / (displayfrequency / 60)))
+        global pacl
+        pacl = self.target.position
+
+
+class MovePacr(cocos.actions.Move):
+    def step(self, dt):
+        super().step(dt)
+        if keyboard[key.I]:
+            if self.target.y >= windowY - (200 * (windowY / 900)):
+                self.target.y = windowY - (200 * (windowY / 900))
+            else:
+                self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency/60)),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.K]:
+            if self.target.y <= (200 * (windowY / 900)):
+                self.target.y = 200 * (windowY / 900)
+            else:
+                self.target.do(MoveBy((0, (-10 * (windowY / 900)) / (displayfrequency/60)),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.J]:
+            if self.target.x <= windowX/2 + (70*windowX/1440):
+                self.target.x = windowX/2 + (70*windowX/1440)
+            else:
+                self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency/60), 0),
+                                      0.01 / (displayfrequency/60)))
+        if keyboard[key.L]:
+            if self.target.x >= windowX - (200 * (windowX / 1440)):
+                self.target.x = windowX - (200 * (windowX / 1440))
+            else:
+                self.target.do(MoveBy(((10 * (windowX / 1440)) / (displayfrequency / 60),0),
+                                      0.01 / (displayfrequency / 60)))
+        global pacr
+        pacr = self.target.position
+
+
 # Used for starting the game
 def on_game_start():
     thisgamescene = Scene()
-    thisgamescene.add(GameScene(), z=2, name="Game")
+    thisgamescene.add(GameScene(), z=-1, name="Game")
     thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.1)
     return thisgamescene
 
