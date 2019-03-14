@@ -1,4 +1,4 @@
-import cocos, pyglet, random, cocos.collision_model as cm,\
+import pyglet, random, cocos.collision_model as cm,\
     cocos.euclid as eu
 from cocos import director
 from cocos.menu import *
@@ -7,6 +7,7 @@ from cocos.actions import *
 from cocos.scenes import *
 from pyglet.window import key
 from glvars import *
+from progressBar import *
 
 
 class Paddle(cocos.sprite.Sprite):
@@ -58,17 +59,6 @@ class PacBall(cocos.sprite.Sprite):
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(70, 100, 175, 255)
-        # Pointing system
-        hpl = cocos.text.RichLabel('PacMan HP: 200', ((windowX / 2)-(200*windowX/1440), (windowY - 40)),
-                                   font_size=16*((windowX+windowY) / (1440+900)), font_name=FN, color=(0, 0, 0, 255),
-                                   anchor_x='right', anchor_y='center')
-        hpl.do(HpCounterL())
-        self.add(hpl)
-        hpr = cocos.text.RichLabel('PacMan HP: 200', ((windowX / 2) + (200 * windowX / 1440), (windowY - 40)),
-                                   font_size=16*((windowX+windowY) / (1440+900)), font_name=FN, color=(0, 0, 0, 255),
-                                   anchor_x='left', anchor_y='center')
-        hpr.do(HpCounterR())
-        self.add(hpr)
         self.pointsl = cocos.text.Label('POINTS: 0', ((120*(windowX/1440)), (windowY - 40)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
@@ -103,6 +93,8 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.pacright)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
+        self.healthbar = HealthBar()
+        self.add(self.healthbar)
 
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paclhp, pacrhp
@@ -126,24 +118,59 @@ class GameScene(cocos.layer.ColorLayer):
             self.GhostBall.x += self.paddleRight.width + self.GhostBall.dx + 50
 
         if self.coll_manager.they_collide(self.pacleft, self.GhostBall):
-            self.GhostBall.x -= self.pacleft.width + 10
+            self.GhostBall.x -= self.pacleft.width * 2
             print(paclhp)
             if paclhp == 0:
                 pass
             else:
-                paclhp -= 50
-            print(paclhp)
+                paclhp -= 25
         if self.coll_manager.they_collide(self.pacright, self.GhostBall):
-            self.GhostBall.x += self.pacleft.width + 10
+            self.GhostBall.x += self.pacleft.width * 2
             if pacrhp == 0:
                 pass
             else:
-                pacrhp -= 50
+                pacrhp -= 25
 
 
 ########################
     # Move actions #
 ########################
+class HealthBar(cocos.layer.Layer):
+    def __init__(self):
+        w, h = director.director.get_window_size()
+        super(HealthBar, self).__init__()
+
+        self.add(cocos.layer.ColorLayer(100, 100, 200, 0, width=w, height=48), z=-1)
+        self.position = (0, h - 48)
+
+        self.progressbar = ProgressBar(200, 20)
+        self.progressbar.position = 50, 15
+        self.add(self.progressbar)
+        self.progressbar.do(UpdateBarLeft())
+
+        self.progressbar2 = ProgressBar(200, 20)
+        self.progressbar2.position = w-50-self.progressbar2.width, 15
+        self.add(self.progressbar2)
+        self.progressbar2.do(UpdateBarRight())
+
+
+class UpdateBarRight(cocos.actions.Action):
+    def step(self, dt):
+        super().step(dt)
+        if pacrhp == 0:
+            pass
+        else:
+            self.target.set_progress(pacrhp*0.01)
+
+
+class UpdateBarLeft(cocos.actions.Action):
+    def step(self, dt):
+        if paclhp == 0:
+            pass
+        else:
+            self.target.set_progress(paclhp*0.01)
+
+
 class PointslAction(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -174,16 +201,6 @@ class PointsrAction(cocos.actions.Action):
                            MoveBy((0, -70 * (windowY / 900)), 0.3) +
                            MoveBy((0, 70 * (windowY / 900)), 0.3) +
                            MoveBy((135 * (windowX / 1440), 0), 0.3))
-
-
-class HpCounterL(cocos.actions.Action):
-    def step(self, dt):
-        self.target.element.text = 'PacMan HP: %d' % paclhp
-
-
-class HpCounterR(cocos.actions.Action):
-    def step(self, dt):
-        self.target.element.text = 'PacMan HP: %d' % pacrhp
 
 
 class MoveBall(cocos.actions.Move):
