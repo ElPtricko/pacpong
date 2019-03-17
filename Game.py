@@ -373,6 +373,8 @@ class EndGame(Menu):
                 new_idx = 0
             self._select_item(new_idx)
             return True
+        elif symbol in (key.Q, key.U, key.E, key.Q):
+            return True
 
 
 class BackgroundEnd(cocos.layer.ColorLayer):
@@ -450,7 +452,7 @@ class MainMenu(Menu):
                 new_idx = 0
             self._select_item(new_idx)
             return True
-        elif symbol in (key.Q, key.U):
+        elif symbol in (key.Q, key.U, key.E, key.Q):
             return True
 
 
