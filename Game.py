@@ -1,55 +1,11 @@
-import pyglet, random, cocos.collision_model as cm,\
-    cocos.euclid as eu
+import random
 from cocos import director
 from cocos.menu import *
 from cocos.scene import Scene
-from cocos.actions import *
 from cocos.scenes import *
 from pyglet.window import key
-from glvars import *
 from progressBar import *
-
-
-class Paddle(cocos.sprite.Sprite):
-    def __init__(self, img, side):
-        super().__init__(pyglet.resource.image(img))
-        self.velocity = (0, 0)
-        self.scale_y = 1.8 * (windowY / 900)
-        self.scale_x = 0.8 * (windowX / 1440)
-        if side == 'left':
-            self.position = 100 * (windowX / 1440), (windowY / 2)
-        if side == 'right':
-            self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
-
-
-class GhostBall(cocos.sprite.Sprite):
-    def __init__(self, img):
-        super().__init__(pyglet.resource.image(img))
-        self.velocity = (0, 0)
-        self.scale_x = self.scale_y = 0.6 * (windowX/1440)
-        self.color = (100, 255, 0)
-        self.dx = (14.4 * (windowX/1440)) / (displayfrequency/60)
-        self.dy = (14.4 * (windowY/900)) / (displayfrequency/60)
-        self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
-        self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
-
-
-class PacBall(cocos.sprite.Sprite):
-    def __init__(self, img, color, side):
-        super().__init__(img)
-        self.velocity = (0, 0)
-        self.scale_x = self.scale_y = 0.5 * (windowX/1440)
-        self.color = color
-        if side is 'left':
-            self.image = pyglet.resource.image(img)
-            self.position = (windowX/4), (windowY/2)
-        if side is 'right':
-            self.image = pyglet.resource.image(img, flip_x=True)
-            self.position = ((windowX/4)*3, windowY/2)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
-        self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
+from sprites import *
 
 
 class GameScene(cocos.layer.ColorLayer):
@@ -100,7 +56,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(CheesePoints('left'))
 
     def updateobj(self, dt):
-        global ballCollidingL, ballCollidingR, paclhp, pacrhp
+        global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr
         self.GhostBall.position = ballpos
         self.paddleLeft.position = pl
         self.paddleRight.position = pr
@@ -112,33 +68,14 @@ class GameScene(cocos.layer.ColorLayer):
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
         self.pacleft.cshape.center = eu.Vector2(*self.pacleft.position)
         self.pacright.cshape.center = eu.Vector2(*self.pacright.position)
-
         if self.coll_manager.they_collide(self.GhostBall, self.paddleRight):
             ballCollidingR = True
-            self.GhostBall.x -= self.paddleRight.width + self.GhostBall.dx + 50
         if self.coll_manager.they_collide(self.GhostBall, self.paddleLeft):
             ballCollidingL = True
-            self.GhostBall.x += self.paddleRight.width + self.GhostBall.dx + 50
-
         if self.coll_manager.they_collide(self.pacleft, self.GhostBall):
-            self.GhostBall.x -= self.pacleft.width * 2
-            if paclhp is not 0 and left_points > -1:
-                paclhp -= 25
-            if paclhp is 0:
-                self.exit()
-
+            paccollisionl = True
         if self.coll_manager.they_collide(self.pacright, self.GhostBall):
-            self.GhostBall.x += self.pacleft.width * 2
-            if pacrhp is not 0 and left_points > -1:
-                pacrhp -= 25
-            if pacrhp is 0:
-                self.exit()
-
-    def exit(self):
-        if paclhp > pacrhp:
-            director.director.push(FadeTransition(on_game_end('THE LEFT PLAYER'), 3))
-        else:
-            director.director.push(FadeTransition(on_game_end('THE RIGHT PLAYER'), 3))
+            paccollisionr = True
 
 
 class HealthBar(cocos.layer.Layer):
@@ -175,16 +112,16 @@ class CheesePoints(cocos.layer.ColorLayer):
 class UpdateBarRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        if pacrhp == 0:
-            pass
+        if pacrhp <= 0.0:
+            game_over()
         else:
             self.target.set_progress(pacrhp*0.01)
 
 
 class UpdateBarLeft(cocos.actions.Action):
     def step(self, dt):
-        if paclhp == 0:
-            pass
+        if paclhp <= 0.0:
+            game_over()
         else:
             self.target.set_progress(paclhp*0.01)
 
@@ -225,7 +162,7 @@ class MoveBall(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
         global ballpos, ballCollidingR, ballCollidingL, left_points, \
-            right_points, addedpointR, addedpointL
+            right_points, addedpointR, addedpointL, paccollisionr, paccollisionl, paclhp, pacrhp
         self.target.y = (self.target.y + self.target.dy)
         self.target.x = (self.target.x + self.target.dx)
         ballpos = self.target.position
@@ -256,11 +193,33 @@ class MoveBall(cocos.actions.Move):
         if ballCollidingL:
             ballCollidingL = False
             self.target.dx *= -1
-            self.target.x += 30
+            self.target.x += 40 * (windowX/1440)
         if ballCollidingR:
             ballCollidingR = False
             self.target.dx *= -1
-            self.target.x -= 30
+            self.target.x -= 40 * (windowX/1440)
+        if paccollisionl:
+            paclhp -= 25
+            if self.target.dx < 0:
+                self.target.x -= 50 * (windowX/1440)
+            if self.target.dx > 0:
+                self.target.x += 50 * (windowX/1440)
+            if self.target.dy < 0:
+                self.target.y -= 50 * (windowY / 900)
+            if self.target.dy > 0:
+                self.target.y += 50 * (windowY / 900)
+            paccollisionl = False
+        if paccollisionr:
+            pacrhp -= 25
+            if self.target.dx < 0:
+                self.target.x -= 50 * (windowX / 1440)
+            if self.target.dx > 0:
+                self.target.x += 50 * (windowX / 1440)
+            if self.target.dy < 0:
+                self.target.y -= 50 * (windowY / 900)
+            if self.target.dy > 0:
+                self.target.y += 50 * (windowY / 900)
+            paccollisionr = False
 
 
 class MovePaddleLeft(cocos.actions.Move):
@@ -366,7 +325,7 @@ class MovePacr(cocos.actions.Move):
 # End Game Scene
 class EndGame(Menu):
     def __init__(self, winner):
-        super().__init__(winner + ' HAS WON THE GAME!')
+        super().__init__(winner + ' HAS WON!')
 
         self.font_title = {'font_name': FN, 'font_size': 25 * ((windowX + windowY) / (1440 + 900)),
                            'color': (255, 220, 50, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
@@ -427,6 +386,13 @@ def on_game_start():
     thisgamescene.add(GameScene(), z=-1, name="Game")
     thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.1)
     return thisgamescene
+
+
+def game_over():
+    if paclhp > pacrhp:
+        director.director.push(FadeTransition(on_game_end('THE LEFT PLAYER'), 3))
+    else:
+        director.director.push(FadeTransition(on_game_end('THE RIGHT PLAYER'), 3))
 
 
 def on_game_end(winner):
