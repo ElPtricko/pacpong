@@ -1,8 +1,10 @@
 import platform
-from pyglet import font
+from pyglet import *
 
 font.add_file('resources/Splatch.ttf')
 FN = 'Splatch'
+resource.path = ['resources']
+resource.reindex()
 ballpos = (5, 0)
 pl = (500, 500)
 pr = (1000, 1000)

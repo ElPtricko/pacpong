@@ -9,7 +9,7 @@ class ProgressBar(cocos.cocosnode.CocosNode):
         self.width, self.height = width, height
         self.vertexes_in = [(0, 0, 0), (width, 0, 0), (width, height, 0), (0, height, 0)]
         self.vertexes_out = [(-2, -2, 0),
-            (width + 2, -2, 0), (width + 2, height + 2, 0), (-2, height + 2, 0)]
+                             (width + 2, -2, 0), (width + 2, height + 2, 0), (-2, height + 2, 0)]
 
     def set_progress(self, percent):
         width = int(self.width * percent)

@@ -11,23 +11,21 @@ from progressBar import *
 
 
 class Paddle(cocos.sprite.Sprite):
-    def __init__(self, image, side):
-        super().__init__(image)
+    def __init__(self, img, side):
+        super().__init__(pyglet.resource.image(img))
         self.velocity = (0, 0)
         self.scale_y = 1.8 * (windowY / 900)
         self.scale_x = 0.8 * (windowX / 1440)
         if side == 'left':
             self.position = 100 * (windowX / 1440), (windowY / 2)
-            self.do(MovePaddleLeft())
         if side == 'right':
             self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
-            self.do(MovePaddleRight())
         self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
 
 
 class GhostBall(cocos.sprite.Sprite):
-    def __init__(self, image):
-        super().__init__(image)
+    def __init__(self, img):
+        super().__init__(pyglet.resource.image(img))
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.6 * (windowX/1440)
         self.color = (100, 255, 0)
@@ -35,23 +33,21 @@ class GhostBall(cocos.sprite.Sprite):
         self.dy = (14.4 * (windowY/900)) / (displayfrequency/60)
         self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
-        self.do(MoveBall())
         self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
 
 
 class PacBall(cocos.sprite.Sprite):
-    def __init__(self, image, color, side):
-        super().__init__(image)
+    def __init__(self, img, color, side):
+        super().__init__(img)
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.5 * (windowX/1440)
         self.color = color
         if side is 'left':
+            self.image = pyglet.resource.image(img)
             self.position = (windowX/4), (windowY/2)
-            self.do(MovePacl())
         if side is 'right':
-            self.scale_x *= -1
+            self.image = pyglet.resource.image(img, flip_x=True)
             self.position = ((windowX/4)*3, windowY/2)
-            self.do(MovePacr())
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
 
@@ -59,12 +55,12 @@ class PacBall(cocos.sprite.Sprite):
 class GameScene(cocos.layer.ColorLayer):
     def __init__(self):
         super(GameScene, self).__init__(70, 100, 175, 255)
-        self.pointsl = cocos.text.Label('POINTS: 0', ((120*(windowX/1440)), (windowY - 40)),
+        self.pointsl = cocos.text.Label('POINTS: ' + str(left_points), ((120*(windowX/1440)), (windowY - 40)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.pointsl.do(PointslAction())
         self.add(self.pointsl)
-        self.pointsr = cocos.text.Label('POINTS: 0', ((windowX-120*(windowX/1440)), (windowY - 40)),
+        self.pointsr = cocos.text.Label('POINTS: ' + str(right_points), ((windowX-120*(windowX/1440)), (windowY - 40)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.pointsr.do((RotateBy(10, 0.04) + RotateBy(-20, 0.08) +
@@ -78,23 +74,30 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.pointsr)
 
         # Paddles
-        self.paddleLeft = Paddle("resources/paddle.png", 'left')
+        self.paddleLeft = Paddle("paddle.png", 'left')
+        self.paddleLeft.do(MovePaddleLeft())
         self.add(self.paddleLeft, z=1)
-        self.paddleRight = Paddle("resources/paddle.png", 'right')
+        self.paddleRight = Paddle("paddle.png", 'right')
+        self.paddleRight.do(MovePaddleRight())
         self.add(self.paddleRight, z=1)
 
         # Ghost Ball
-        self.GhostBall = GhostBall("resources/ghost.png")
+        self.GhostBall = GhostBall("ghost.png")
+        self.GhostBall.do(MoveBall())
         self.add(self.GhostBall)
         # Pac ball
-        self.pacleft = PacBall("resources/pacball.png", (255, 0, 0), 'left')
+        self.pacleft = PacBall("pacball.png", (255, 0, 0), 'left')
+        self.pacleft.do(MovePacl())
         self.add(self.pacleft)
-        self.pacright = PacBall("resources/pacball.png", (200, 200, 200), 'right')
+        self.pacright = PacBall("pacball.png", (200, 200, 200), 'right')
+        self.pacright.do(MovePacr())
         self.add(self.pacright)
 
         self.coll_manager = cm.CollisionManagerBruteForce()
         self.healthbar = HealthBar()
         self.add(self.healthbar)
+        self.add(CheesePoints('right'))
+        self.add(CheesePoints('left'))
 
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paclhp, pacrhp
@@ -119,22 +122,25 @@ class GameScene(cocos.layer.ColorLayer):
 
         if self.coll_manager.they_collide(self.pacleft, self.GhostBall):
             self.GhostBall.x -= self.pacleft.width * 2
-            print(paclhp)
-            if paclhp == 0:
-                pass
-            else:
+            if paclhp is not 0 and left_points > -1:
                 paclhp -= 25
+            if paclhp is 0:
+                self.exit()
+
         if self.coll_manager.they_collide(self.pacright, self.GhostBall):
             self.GhostBall.x += self.pacleft.width * 2
-            if pacrhp == 0:
-                pass
-            else:
+            if pacrhp is not 0 and left_points > -1:
                 pacrhp -= 25
+            if pacrhp is 0:
+                self.exit()
+
+    def exit(self):
+        if paclhp > pacrhp:
+            director.director.push(FadeTransition(on_game_end('THE LEFT PLAYER'), 3))
+        else:
+            director.director.push(FadeTransition(on_game_end('THE RIGHT PLAYER'), 3))
 
 
-########################
-    # Move actions #
-########################
 class HealthBar(cocos.layer.Layer):
     def __init__(self):
         w, h = director.director.get_window_size()
@@ -153,6 +159,18 @@ class HealthBar(cocos.layer.Layer):
         self.add(self.progressbar2)
         self.progressbar2.do(UpdateBarRight())
 
+
+class CheesePoints(cocos.layer.ColorLayer):
+    def __init__(self, side):
+        super(CheesePoints, self).__init__(100, 100, 200, 0, width=int(windowX/2 - (350*windowX/1440)),
+                                           height=int(windowY-(250*(windowY/900))*2))
+        if side is 'left':
+            self.position = (windowX/2-self.width/2-(300*windowX/1440), windowY/2-self.height/2)
+        else:
+            self.position = (windowX/2-self.width/2+(300*windowX/1440), windowY/2-self.height/2)
+
+
+# ACTIONS #
 
 class UpdateBarRight(cocos.actions.Action):
     def step(self, dt):
@@ -345,32 +363,21 @@ class MovePacr(cocos.actions.Move):
         pacr = self.target.position
 
 
-# Used for starting the game
-def on_game_start():
-    thisgamescene = Scene()
-    thisgamescene.add(GameScene(), z=-1, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.1)
-    return thisgamescene
+# End Game Scene
+class EndGame(Menu):
+    def __init__(self, winner):
+        super().__init__(winner + ' HAS WON THE GAME!')
 
-
-##########################
-    # MAIN MENU #
-##########################
-class MainMenu(Menu):
-    def __init__(self):
-        super().__init__("PACPONG")
-
-    # Style of menu items
-        self.font_title = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
-                           'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
-        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX+windowY) / (1440+900)),
+        self.font_title = {'font_name': FN, 'font_size': 25 * ((windowX + windowY) / (1440 + 900)),
+                           'color': (255, 220, 50, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
+        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX + windowY) / (1440 + 900)),
                           'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
+        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX + windowY) / (1440 + 900)),
                                    'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
 
-    # Menu items incl. functions they trigger
+        # Menu items incl. functions they trigger
         self.items = []
-        self.items.append(MenuItem('PLAY', self.start_game))
+        self.items.append(MenuItem('PLAY AGAIN', self.start_game))
         self.items[0].y = 80
         self.items.append(MenuItem('OPTIONS', self.options))
         self.items[1].y = 40
@@ -379,7 +386,12 @@ class MainMenu(Menu):
         self.create_menu(self.items, shake(), shake_back())
 
     def start_game(self):
-        director.director.run(FadeTransition(on_game_start(), 1))
+        global paclhp, pacrhp, left_points, right_points
+        paclhp = 100
+        pacrhp = 100
+        left_points = -1
+        right_points = 0
+        director.director.push(JumpZoomTransition(on_game_start(), 1))
 
     def quit(self):
         pyglet.app.exit()
@@ -404,11 +416,83 @@ class MainMenu(Menu):
             return True
 
 
+class BackgroundEnd(cocos.layer.ColorLayer):
+    def __init__(self):
+        super().__init__(0, 0, 0, 100)
+
+
+# Used for starting the game
+def on_game_start():
+    thisgamescene = Scene()
+    thisgamescene.add(GameScene(), z=-1, name="Game")
+    thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.1)
+    return thisgamescene
+
+
+def on_game_end(winner):
+    endscene = Scene()
+    endscene.add(EndGame(winner), z=-1, name="MENU")
+    endscene.add(BackgroundEnd(), z=-2, name="BG")
+    return endscene
+
+
+# MAIN MENU #
+
+class MainMenu(Menu):
+    def __init__(self):
+        super().__init__("PACPONG")
+
+    # Style of menu items
+        self.font_title = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
+                           'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
+        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX+windowY) / (1440+900)),
+                          'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
+        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
+                                   'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
+
+    # Menu items incl. functions they trigger
+        self.items = []
+        self.items.append(MenuItem('PLAY', self.start_game))
+        self.items[0].y = 80
+        self.items.append(MenuItem('OPTIONS', self.options))
+        self.items[1].y = 40
+        self.items.append(MenuItem('QUIT', self.quit))
+        self.selected = 0
+        self.create_menu(self.items, shake(), shake_back())
+
+    def start_game(self):
+        director.director.push(FadeTransition(on_game_start(), 1))
+
+    def quit(self):
+        pyglet.app.exit()
+
+    def options(self):
+        pass
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol in (key.ENTER, key.NUM_ENTER):
+            self._activate_item()
+            return True
+        elif symbol in (key.DOWN, key.UP, key.S, key.W):
+            if symbol == key.DOWN or symbol == key.S:
+                new_idx = self.selected_index + 1
+            elif symbol == key.UP or symbol == key.W:
+                new_idx = self.selected_index - 1
+            if new_idx < 0:
+                new_idx = len(self.children) - 1
+            elif new_idx > len(self.children) - 1:
+                new_idx = 0
+            self._select_item(new_idx)
+            return True
+        elif symbol in (key.Q, key.U):
+            return True
+
+
 # Centered background capable of handling animations #
 class BackgroundLayer(cocos.layer.Layer):
     def __init__(self):
         super().__init__()
-        bg = cocos.sprite.Sprite(pyglet.image.load_animation('resources/bg.gif'))
+        bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
         bg.scale = 1.2 * ((windowX+windowY) / (1440+900))
         bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY/2)
         self.add(bg)
