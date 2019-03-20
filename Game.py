@@ -52,8 +52,6 @@ class GameScene(cocos.layer.ColorLayer):
         self.coll_manager = cm.CollisionManagerBruteForce()
         self.healthbar = HealthBar()
         self.add(self.healthbar)
-        self.add(CheesePoints('right'))
-        self.add(CheesePoints('left'))
 
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr
@@ -68,6 +66,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
         self.pacleft.cshape.center = eu.Vector2(*self.pacleft.position)
         self.pacright.cshape.center = eu.Vector2(*self.pacright.position)
+
         if self.coll_manager.they_collide(self.GhostBall, self.paddleRight):
             ballCollidingR = True
         if self.coll_manager.they_collide(self.GhostBall, self.paddleLeft):
@@ -97,14 +96,54 @@ class HealthBar(cocos.layer.Layer):
         self.progressbar2.do(UpdateBarRight())
 
 
-class CheesePoints(cocos.layer.ColorLayer):
-    def __init__(self, side):
-        super(CheesePoints, self).__init__(100, 100, 200, 0, width=int(windowX/2 - (350*windowX/1440)),
-                                           height=int(windowY-(250*(windowY/900))*2))
-        if side is 'left':
-            self.position = (windowX/2-self.width/2-(300*windowX/1440), windowY/2-self.height/2)
-        else:
-            self.position = (windowX/2-self.width/2+(300*windowX/1440), windowY/2-self.height/2)
+class CheesePointsL(cocos.layer.ColorLayer):
+    def __init__(self):
+        super(CheesePointsL, self).__init__(100, 100, 200, 0, width=int(windowX/2 - (350*windowX/1440)),
+                                            height=int(windowY-(250*(windowY/900))*2))
+        self.position = (windowX/2-self.width/2-(300*windowX/1440), windowY/2-self.height/2)
+
+        self.coll_manager = cm.CollisionManagerBruteForce()
+
+        self.pointsN = []
+        for x in range(1, 10):
+            self.pointsN.append(Cheese())
+            self.pointsN[x-1].position = random.randrange(0, self.width), random.randrange(0, self.height)
+            self.pointsN[x-1].cshape = cm.CircleShape(eu.Vector2(*self.pointsN[x-1].position),
+                                                      self.pointsN[x-1].width/2)
+            self.add(self.pointsN[x-1])
+
+    def updatecheese(self, dt):
+        if ballcoll is not None and ballcollr is not None:
+            for x in range(1, 10):
+                self.pointsN[x-1].cshape = cm.CircleShape(eu.Vector2(*self.pointsN[x-1].position),
+                                                          self.pointsN[x-1].width/2)
+                if self.coll_manager.they_collide(ballcoll, self.pointsN[x-1]):
+                    self.pointsN[x-1].position = (2000, 2000)
+                    print(self.pointsN[x-1].position)
+
+
+class CheesePointsR(cocos.layer.ColorLayer):
+    def __init__(self):
+        super(CheesePointsR, self).__init__(100, 100, 200, 0, width=int(windowX/2 - (350*windowX/1440)),
+                                            height=int(windowY-(250*(windowY/900))*2))
+        self.position = (windowX/2-self.width/2+(300*windowX/1440), windowY/2-self.height/2)
+        self.coll_manager = cm.CollisionManagerBruteForce()
+        self.pointsN = []
+        for x in range(1, 10):
+            self.pointsN.append(Cheese())
+            self.pointsN[x-1].position = random.randrange(0, self.width), random.randrange(0, self.height)
+            self.pointsN[x-1].cshape = cm.CircleShape(eu.Vector2(*self.pointsN[x-1].position),
+                                                      self.pointsN[x-1].width/2)
+            self.add(self.pointsN[x-1])
+
+    def updatecheese(self, dt):
+        if ballcoll is not None and ballcollr is not None:
+            for x in range(1, 10):
+                self.pointsN[x-1].cshape = cm.CircleShape(eu.Vector2(*self.pointsN[x-1].position),
+                                                          self.pointsN[x-1].width/2)
+                if self.coll_manager.they_collide(ballcoll, self.pointsN[x-1]):
+                    self.pointsN[x-1].position = (2000, 2000)
+                    print(self.pointsN[x-1].position)
 
 
 # ACTIONS #
@@ -231,7 +270,7 @@ class MovePaddleLeft(cocos.actions.Move):
             else:
                 self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency/60)),
                                       0.01 / (displayfrequency/60)))
-        if keyboard[key.E]:
+        if keyboard[key.Z]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
@@ -244,13 +283,13 @@ class MovePaddleLeft(cocos.actions.Move):
 class MovePaddleRight(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
-        if keyboard[key.U]:
+        if keyboard[key.O]:
             if self.target.y > windowY - (165 * (windowY / 900)):
                 self.target.y = windowY - (160 * (windowY / 900))
             else:
                 self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency/60)),
                                       0.01 / (displayfrequency/60)))
-        if keyboard[key.O]:
+        if keyboard[key.PERIOD]:
             if self.target.y < (145 * (windowY / 900)):
                 self.target.y = 140 * (windowY / 900)
             else:
@@ -387,6 +426,8 @@ def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=-1, name="Game")
     thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.1)
+    thisgamescene.schedule_interval(CheesePointsL().updatecheese, (1/60)/(displayfrequency/144)*1.1)
+    thisgamescene.schedule_interval(CheesePointsR().updatecheese, (1/60)/(displayfrequency/144)*1.1)
     return thisgamescene
 
 
@@ -466,9 +507,7 @@ class BackgroundLayer(cocos.layer.Layer):
         self.add(bg)
 
 
-################################
-        # MAIN DIRECTOR #
-################################
+# MAIN DIRECTOR #
 class Handlers(object):
     def on_key_press(symbol, modifiers):
         if symbol is key.ESCAPE:

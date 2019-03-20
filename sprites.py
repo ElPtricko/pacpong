@@ -43,3 +43,11 @@ class PacBall(cocos.sprite.Sprite):
             self.position = ((windowX/4)*3, windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
+
+
+class Cheese(cocos.sprite.Sprite):
+    def __init__(self):
+        super().__init__(pyglet.resource.image("pacball.png"))
+        self.scale_x = self.scale_y = 0.2
+        self.color = (0, 0, 0)
+        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
