@@ -35,6 +35,7 @@ class PacBall(cocos.sprite.Sprite):
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.5 * (windowX/1440)
         self.color = color
+        self.dx = 1
         if side is 'left':
             self.image = pyglet.resource.image(img)
             self.position = (windowX/4), (windowY/2)
@@ -45,9 +46,23 @@ class PacBall(cocos.sprite.Sprite):
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
 
 
-class Cheese(cocos.sprite.Sprite):
+class FireBall(cocos.sprite.Sprite):
+    def __init__(self, pointto=None):
+        super().__init__(pyglet.resource.animation('fireball.gif'), position=(-100, -100), rotation=90)
+        if pointto is not None:
+            self.rotation = 270
+        self.scale_x = self.scale_y = 0.5 * (windowX/1440)
+
+
+class Healing(cocos.sprite.Sprite):
     def __init__(self):
-        super().__init__(pyglet.resource.image("pacball.png"))
-        self.scale_x = self.scale_y = 0.2
-        self.color = (0, 0, 0)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
+        super().__init__(pyglet.resource.image('healing2.png'), position=(-100, 100))
+        self.scale_x = self.scale_y = 0.4 * (windowX/1440)
+        self.opacity = 170
+
+
+class SpeedUp(cocos.sprite.Sprite):
+    def __init__(self):
+        super().__init__(pyglet.resource.animation('speed2.gif'), position=(-1000, -1000))
+        self.scale_x = self.scale_y = (windowY/self.width)
+        self.opacity = 100
