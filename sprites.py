@@ -56,7 +56,7 @@ class FireBall(cocos.sprite.Sprite):
 
 class Healing(cocos.sprite.Sprite):
     def __init__(self):
-        super().__init__(pyglet.resource.image('healing2.png'), position=(-100, 100))
+        super().__init__(pyglet.resource.image('healing2.png'), position=(-100, -100))
         self.scale_x = self.scale_y = 0.4 * (windowX/1440)
         self.opacity = 170
 

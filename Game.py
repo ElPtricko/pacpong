@@ -118,14 +118,14 @@ class GameScene(cocos.layer.ColorLayer):
             paclhp += 20
             powerleft -= 0
             self.heal.do(MoveTo(pacl, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
-                         + ScaleTo(1.2, 0.2)+MoveTo((-100, 100), 0))
+                         + ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.8) + MoveNormal())
         if powerright > 0 and symbol == key.N:
             pacrhp += 20
             powerright -= 0
             self.heal2.do(MoveTo(pacr, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
-                          + ScaleTo(1.2, 0.2)+MoveTo((-100, 100), 0))
+                          + ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacright.do(NoMove())
             self.pacright.do(Delay(0.8) + MoveNormal())
         if powerleft > 70 and symbol == key.F:
@@ -387,24 +387,24 @@ class MoveBall(cocos.actions.Move):
         if paccollisionl:
             paclhp -= 25
             if self.target.dx < 0:
-                self.target.x -= 40 * (windowX/1440)
+                self.target.x -= 50 * (windowX/1440)
             if self.target.dx > 0:
-                self.target.x += 40 * (windowX/1440)
+                self.target.x += 50 * (windowX/1440)
             if self.target.dy < 0:
-                self.target.y -= 40 * (windowY / 900)
+                self.target.y -= 50 * (windowY / 900)
             if self.target.dy > 0:
-                self.target.y += 40 * (windowY / 900)
+                self.target.y += 50 * (windowY / 900)
             paccollisionl = False
         if paccollisionr:
             pacrhp -= 25
             if self.target.dx < 0:
-                self.target.x -= 40 * (windowX / 1440)
+                self.target.x -= 50 * (windowX / 1440)
             if self.target.dx > 0:
-                self.target.x += 40 * (windowX / 1440)
+                self.target.x += 50 * (windowX / 1440)
             if self.target.dy < 0:
-                self.target.y -= 40 * (windowY / 900)
+                self.target.y -= 50 * (windowY / 900)
             if self.target.dy > 0:
-                self.target.y += 40 * (windowY / 900)
+                self.target.y += 50 * (windowY / 900)
             paccollisionr = False
 
 
@@ -559,7 +559,6 @@ class EndGame(Menu):
                           'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
         self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX + windowY) / (1440 + 900)),
                                    'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
-
         # Menu items incl. functions they trigger
         self.items = []
         self.items.append(MenuItem('PLAY AGAIN', self.start_game))
@@ -578,7 +577,7 @@ class EndGame(Menu):
         right_points = 0
         powerleft = 0
         powerright = 0
-        director.director.push(JumpZoomTransition(on_game_start(), 1))
+        director.director.push(MoveInRTransition(on_game_start(), 1))
 
     def quit(self):
         pyglet.app.exit()
@@ -610,7 +609,67 @@ class BackgroundEnd(cocos.layer.ColorLayer):
         super().__init__(0, 0, 0, 100)
 
 
-# Used for starting the game
+# MAIN MENU #
+class MainMenu(Menu):
+    def __init__(self):
+        super().__init__("PACPONG")
+
+    # Style of menu items
+        self.font_title = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
+                           'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
+        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX+windowY) / (1440+900)),
+                          'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
+        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
+                                   'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
+
+    # Menu items incl. functions they trigger
+        self.items = []
+        self.items.append(MenuItem('PLAY', self.start_game))
+        self.items[0].y = 80
+        self.items.append(MenuItem('OPTIONS', self.options))
+        self.items[1].y = 40
+        self.items.append(MenuItem('QUIT', self.quit))
+        self.selected = 0
+        self.create_menu(self.items, shake(), shake_back())
+
+    def start_game(self):
+        director.director.push(MoveInRTransition(on_game_start(), 1))
+
+    def quit(self):
+        pyglet.app.exit()
+
+    def options(self):
+        pass
+
+    def on_key_press(self, symbol, modifiers):
+        if symbol in (key.ENTER, key.NUM_ENTER):
+            self._activate_item()
+            return True
+        elif symbol in (key.DOWN, key.UP, key.S, key.W):
+            if symbol == key.DOWN or symbol == key.S:
+                new_idx = self.selected_index + 1
+            elif symbol == key.UP or symbol == key.W:
+                new_idx = self.selected_index - 1
+            if new_idx < 0:
+                new_idx = len(self.children) - 1
+            elif new_idx > len(self.children) - 1:
+                new_idx = 0
+            self._select_item(new_idx)
+            return True
+        elif symbol in (key.Q, key.PERIOD, key.Z, key.Q):
+            return True
+
+
+class BackgroundLayer(cocos.layer.Layer):
+    def __init__(self):
+        super().__init__()
+        bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
+        bg.scale = 1.2 * ((windowX+windowY) / (1440+900))
+        bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY/2)
+        self.add(bg)
+
+
+# MAIN DIRECTOR #
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=-1, name="Game")
@@ -638,69 +697,6 @@ def calculate_seconds(balldx, seconds):
     return abs(ballsmth)
 
 
-# MAIN MENU #
-
-class MainMenu(Menu):
-    def __init__(self):
-        super().__init__("PACPONG")
-
-    # Style of menu items
-        self.font_title = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
-                           'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
-        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX+windowY) / (1440+900)),
-                          'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX+windowY) / (1440+900)),
-                                   'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
-
-    # Menu items incl. functions they trigger
-        self.items = []
-        self.items.append(MenuItem('PLAY', self.start_game))
-        self.items[0].y = 80
-        self.items.append(MenuItem('OPTIONS', self.options))
-        self.items[1].y = 40
-        self.items.append(MenuItem('QUIT', self.quit))
-        self.selected = 0
-        self.create_menu(self.items, shake(), shake_back())
-
-    def start_game(self):
-        director.director.push(FadeTransition(on_game_start(), 1))
-
-    def quit(self):
-        pyglet.app.exit()
-
-    def options(self):
-        pass
-
-    def on_key_press(self, symbol, modifiers):
-        if symbol in (key.ENTER, key.NUM_ENTER):
-            self._activate_item()
-            return True
-        elif symbol in (key.DOWN, key.UP, key.S, key.W):
-            if symbol == key.DOWN or symbol == key.S:
-                new_idx = self.selected_index + 1
-            elif symbol == key.UP or symbol == key.W:
-                new_idx = self.selected_index - 1
-            if new_idx < 0:
-                new_idx = len(self.children) - 1
-            elif new_idx > len(self.children) - 1:
-                new_idx = 0
-            self._select_item(new_idx)
-            return True
-        elif symbol in (key.Q, key.PERIOD, key.Z, key.Q):
-            return True
-
-
-# Centered background capable of handling animations #
-class BackgroundLayer(cocos.layer.Layer):
-    def __init__(self):
-        super().__init__()
-        bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
-        bg.scale = 1.2 * ((windowX+windowY) / (1440+900))
-        bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY/2)
-        self.add(bg)
-
-
-# MAIN DIRECTOR #
 class Handlers(object):
     def on_key_press(symbol, modifiers):
         if symbol is key.ESCAPE:
