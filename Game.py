@@ -104,41 +104,41 @@ class GameScene(cocos.layer.ColorLayer):
             self.fireball2.position = pacl
             self.fireball2.do(MoveBy((abs(pacl[0]+self.pacleft.width/2-pacr[0]), pacr[1]-pacl[1]), 0.4) +
                               MoveTo((-100, -100), 0))
-            self.pacright.do(nomove())
-            self.pacright.do(Delay(0.3)+movenormal())
+            self.pacright.do(NoMove())
+            self.pacright.do(Delay(0.3)+MoveNormal())
         if powerright > 20 and symbol == key.M:
             powerright -= 20
             paclhp -= 5
             self.fireball.position = pacr
             self.fireball.do(MoveBy(((pacl[0] + self.pacleft.width/2)-pacr[0], pacl[1]-pacr[1]), 0.4) +
                              MoveTo((-100, -100), 0))
-            self.pacleft.do(nomove())
-            self.pacleft.do(Delay(0.3)+movenormal())
+            self.pacleft.do(NoMove())
+            self.pacleft.do(Delay(0.3)+MoveNormal())
         if powerleft > 0 and symbol == key.V:
             paclhp += 20
             powerleft -= 0
             self.heal.do(MoveTo(pacl, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
                          + ScaleTo(1.2, 0.2)+MoveTo((-100, 100), 0))
-            self.pacleft.do(nomove())
-            self.pacleft.do(Delay(0.8) + movenormal())
+            self.pacleft.do(NoMove())
+            self.pacleft.do(Delay(0.8) + MoveNormal())
         if powerright > 0 and symbol == key.N:
             pacrhp += 20
             powerright -= 0
             self.heal2.do(MoveTo(pacr, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
                           + ScaleTo(1.2, 0.2)+MoveTo((-100, 100), 0))
-            self.pacright.do(nomove())
-            self.pacright.do(Delay(0.8) + movenormal())
+            self.pacright.do(NoMove())
+            self.pacright.do(Delay(0.8) + MoveNormal())
         if powerleft > 70 and symbol == key.F:
             self.speed.do(MoveTo((self.width/2+self.speed.width/2, self.speed.height/2), 0) + Delay(5) +
                           MoveTo((-1000, -1000), 0))
-            self.pacright.do(movefaster())
-            self.pacright.do(Delay(5) + movenormal())
+            self.pacright.do(MoveFaster())
+            self.pacright.do(Delay(5) + MoveNormal())
             powerleft -= 70
         if powerright > 70 and symbol == key.H:
             self.speed2.do(MoveTo((self.width/2-self.speed2.width/2, self.speed.height/2), 0) + Delay(5) +
                            MoveTo((-1000, -1000), 0))
-            self.pacleft.do(movefaster())
-            self.pacleft.do(Delay(5) + movenormal())
+            self.pacleft.do(MoveFaster())
+            self.pacleft.do(Delay(5) + MoveNormal())
             powerright -= 70
 
 
@@ -197,7 +197,7 @@ class PowerBar(cocos.layer.ColorLayer):
         self.progressbar2 = ProgressPowerBar(int(self.width/2), 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
         self.add(self.progressbar2)
-        label = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
+        label = cocos.text.Label("POWER", position=(self.progressbar.position[0] +
                                                     self.progressbar.width-20*(windowX/1440),
                                                     self.progressbar.position[1]+self.progressbar.height/2),
                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
@@ -241,19 +241,19 @@ class PowerBar(cocos.layer.ColorLayer):
 
 
 # ACTIONS #
-class nomove(cocos.actions.Action):
+class NoMove(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.dx = 0
 
 
-class movenormal(cocos.actions.Action):
+class MoveNormal(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.dx = 1
 
 
-class movefaster(cocos.actions.Action):
+class MoveFaster(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.dx = 2
