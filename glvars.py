@@ -22,8 +22,8 @@ addedpointL = False
 addedpointR = False
 ballcollr = None
 ballcoll = None
-powerleft = 0.0
-powerright = 0.0
+powerleft = -10.0
+powerright = 5.0
 if platform.system() == 'Windows':
     import win32api
     displayfrequency = getattr(win32api.EnumDisplaySettings(

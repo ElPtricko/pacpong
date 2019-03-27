@@ -7,12 +7,14 @@ class Paddle(cocos.sprite.Sprite):
     def __init__(self, img, side):
         super().__init__(pyglet.resource.image(img))
         self.velocity = (0, 0)
+        self.invert = False
+        self.stop = False
         self.scale_y = 1.8 * (windowY / 900)
-        self.scale_x = 0.8 * (windowX / 1440)
+        self.scale_x = 0.7 * (windowX / 1440)
         if side == 'left':
-            self.position = 100 * (windowX / 1440), (windowY / 2)
+            self.position = 80 * (windowX / 1440), (windowY / 2)
         if side == 'right':
-            self.position = windowX - 100 * (windowX / 1440), (windowY / 2)
+            self.position = windowX - 80 * (windowX / 1440), (windowY / 2)
         self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
 
 
@@ -35,7 +37,8 @@ class PacBall(cocos.sprite.Sprite):
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.5 * (windowX/1440)
         self.color = color
-        self.dx = 1
+        self.invert = False
+        self.stop = False
         if side is 'left':
             self.image = pyglet.resource.image(img)
             self.position = (windowX/4), (windowY/2)
@@ -63,6 +66,7 @@ class Healing(cocos.sprite.Sprite):
 
 class SpeedUp(cocos.sprite.Sprite):
     def __init__(self):
-        super().__init__(pyglet.resource.animation('speed2.gif'), position=(-1000, -1000))
-        self.scale_x = self.scale_y = (windowY/self.width)
-        self.opacity = 100
+        super().__init__(pyglet.resource.animation('spiral.gif'), position=(-1000, -1000))
+        self.scale_x = self.scale_y = ((windowX/2-100*((windowX+windowY)/(1440+900)))/self.width)
+        self.color = (255, 0, 255)
+        self.opacity = 70
