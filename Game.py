@@ -12,7 +12,9 @@ class GameScene(cocos.layer.ColorLayer):
     is_event_handler = True
 
     def __init__(self):
-        super(GameScene, self).__init__(70, 100, 175, 255)
+        super(GameScene, self).__init__(0, 100, 175, 255)
+        # background = Bg('bg3.png')
+        # self.add(background)
         self.pointsl = cocos.text.Label('POINTS: ' + str(left_points), ((120*(windowX/1440)), 50*(windowY/900)),
                                         font_size=16*((windowX+windowY) / (1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
@@ -129,7 +131,7 @@ class GameScene(cocos.layer.ColorLayer):
             self.pacright.do(NoMove())
             self.pacright.do(Delay(0.8) + MoveNormal())
         if powerleft > 50 and symbol == key.F:
-            self.speed.do(MoveTo((self.width/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0) +
+            self.speed.do(MoveTo((windowX/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0) +
                           Delay(4) + MoveTo((-1000, -1000), 0))
             self.pacright.do(InvertControls())
             self.pacright.do(Delay(4) + MoveNormalInv())
@@ -137,7 +139,7 @@ class GameScene(cocos.layer.ColorLayer):
             self.paddleRight.do(Delay(4) + MoveNormalInv())
             powerleft -= 50
         if powerright > 50 and symbol == key.H:
-            self.speed2.do(MoveTo((self.width/2-self.speed2.width/2, windowY/2), 0) + Delay(4) +
+            self.speed2.do(MoveTo((windowX/2-self.speed2.width/2, windowY/2), 0) + Delay(4) +
                            MoveTo((-1000, -1000), 0))
             self.pacleft.do(InvertControls())
             self.pacleft.do(Delay(4) + MoveNormalInv())
@@ -647,11 +649,6 @@ class EndGame(Menu):
             return True
 
 
-class BackgroundEnd(cocos.layer.ColorLayer):
-    def __init__(self):
-        super().__init__(0, 0, 0, 100)
-
-
 # MAIN MENU #
 class MainMenu(Menu):
     def __init__(self):
@@ -731,7 +728,6 @@ def game_over():
 def on_game_end(winner):
     endscene = Scene()
     endscene.add(EndGame(winner), z=-1, name="MENU")
-    endscene.add(BackgroundEnd(), z=-2, name="BG")
     return endscene
 
 

@@ -70,3 +70,11 @@ class SpeedUp(cocos.sprite.Sprite):
         self.scale_x = self.scale_y = ((windowX/2-100*((windowX+windowY)/(1440+900)))/self.width)
         self.color = (255, 0, 255)
         self.opacity = 70
+
+
+class Bg(cocos.sprite.Sprite):
+    def __init__(self, img):
+        super().__init__(pyglet.resource.image(img))
+        self.scale_x = windowX/self.width
+        self.scale_y = (windowY-80*(windowY/900))/self.height
+        self.position = windowX/2, (windowY/2-40*(windowY/900))
