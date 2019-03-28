@@ -452,12 +452,12 @@ class MovePaddleLeft(cocos.actions.Move):
                 if self.target.y > windowY - (self.target.height / 2 + 110 * (windowY / 900)):
                     self.target.y = windowY - (self.target.height / 2 + 105 * (windowY / 900))
                 else:
-                    self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency / 60)), 0))
+                    self.target.do(MoveBy((0, (30 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.Q] and not keyboard[key.Z]:
                 if self.target.y < (self.target.height / 2 + 90 * (windowY / 900)):
                     self.target.y = self.target.height / 2 + 85 * (windowY / 900)
                 else:
-                    self.target.do(MoveBy((0, (-15 * (windowY / 900)) / (displayfrequency / 60)), 0))
+                    self.target.do(MoveBy((0, (-30 * (windowY / 900)) / (displayfrequency / 60)), 0))
         global pl
         pl = self.target.position
 
@@ -481,12 +481,12 @@ class MovePaddleRight(cocos.actions.Move):
                 if self.target.y > windowY - (self.target.height/2 + 110 * (windowY / 900)):
                     self.target.y = windowY - (self.target.height/2 + 105 * (windowY / 900))
                 else:
-                    self.target.do(MoveBy((0, (15 * (windowY / 900)) / (displayfrequency/60)), 0))
+                    self.target.do(MoveBy((0, (30 * (windowY / 900)) / (displayfrequency/60)), 0))
             if keyboard[key.O] and not keyboard[key.PERIOD]:
                 if self.target.y < (self.target.height/2 + 90 * (windowY / 900)):
                     self.target.y = self.target.height/2 + 85 * (windowY / 900)
                 else:
-                    self.target.do(MoveBy((0, (-15 * (windowY / 900)) / (displayfrequency/60)), 0))
+                    self.target.do(MoveBy((0, (-30 * (windowY / 900)) / (displayfrequency/60)), 0))
         global pr
         pr = self.target.position
 
@@ -499,7 +499,7 @@ class MovePacl(cocos.actions.Move):
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
                 else:
-                    self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency/60)), 0))
+                    self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.S] and not keyboard[key.W]:
                 if self.target.y <= (200 * (windowY / 900)):
                     self.target.y = 200 * (windowY / 900)
@@ -508,11 +508,23 @@ class MovePacl(cocos.actions.Move):
             if keyboard[key.D] and not keyboard[key.A]:
                 if self.target.x >= windowX/2 - (70*windowX/1440):
                     self.target.x = windowX/2 - (70*windowX/1440)
+                elif keyboard[key.W]:
+                    self.target.do(MoveBy((((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.S]:
+                    self.target.do(MoveBy((((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((10 * (windowX / 1440)) / (displayfrequency/60), 0), 0))
             if keyboard[key.A] and not keyboard[key.D]:
                 if self.target.x <= 200 * (windowX / 1440):
                     self.target.x = 200 * (windowX / 1440)
+                elif keyboard[key.W]:
+                    self.target.do(MoveBy(((-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.S]:
+                    self.target.do(MoveBy(((-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
         if self.target.invert is True:
@@ -529,11 +541,23 @@ class MovePacl(cocos.actions.Move):
             if keyboard[key.A] and not keyboard[key.D]:
                 if self.target.x >= windowX/2 - (70*windowX/1440):
                     self.target.x = windowX/2 - (70*windowX/1440)
+                elif keyboard[key.W]:
+                    self.target.do(MoveBy((((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.S]:
+                    self.target.do(MoveBy((((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((20 * (windowX / 1440)) / (displayfrequency/60), 0), 0))
             if keyboard[key.D] and not keyboard[key.A]:
                 if self.target.x <= 200 * (windowX / 1440):
                     self.target.x = 200 * (windowX / 1440)
+                elif keyboard[key.W]:
+                    self.target.do(MoveBy(((-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.S]:
+                    self.target.do(MoveBy(((-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((-20 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
         else:
@@ -550,43 +574,67 @@ class MovePacr(cocos.actions.Move):
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
                 else:
-                    self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency/60)), 0))
+                    self.target.do(MoveBy((0, (10 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.K] and not keyboard[key.I]:
                 if self.target.y <= (200 * (windowY / 900)):
                     self.target.y = 200 * (windowY / 900)
                 else:
-                    self.target.do(MoveBy((0, (-10 * (windowY / 900)) / (displayfrequency/60)), 0))
-            if keyboard[key.J] and not keyboard[key.L]:
-                if self.target.x <= windowX/2 + (70*windowX/1440):
-                    self.target.x = windowX/2 + (70*windowX/1440)
-                else:
-                    self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency/60), 0), 0))
+                    self.target.do(MoveBy((0, (-10 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.L] and not keyboard[key.J]:
-                if self.target.x >= windowX - (200 * (windowX / 1440)):
-                    self.target.x = windowX - (200 * (windowX / 1440))
+                if self.target.x >= windowX - 200 * (windowX / 1440):
+                    self.target.x = windowX - 200 * (windowX / 1440)
+                elif keyboard[key.I]:
+                    self.target.do(MoveBy((((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.K]:
+                    self.target.do(MoveBy((((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((10 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
+            if keyboard[key.J] and not keyboard[key.L]:
+                if self.target.x <= windowX / 2 + (70 * windowX / 1440):
+                    self.target.x = windowX / 2 + (70 * windowX / 1440)
+                elif keyboard[key.I]:
+                    self.target.do(MoveBy(((-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.K]:
+                    self.target.do(MoveBy(((-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                else:
+                    self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
         if self.target.invert is True:
             if keyboard[key.K] and not keyboard[key.I]:
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
                 else:
-                    self.target.do(MoveBy((0, (20 * (windowY / 900)) / (displayfrequency/60)), 0))
+                    self.target.do(MoveBy((0, (20 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.I] and not keyboard[key.K]:
                 if self.target.y <= (200 * (windowY / 900)):
                     self.target.y = 200 * (windowY / 900)
                 else:
-                    self.target.do(MoveBy((0, (-20 * (windowY / 900)) / (displayfrequency/60)), 0))
-            if keyboard[key.L] and not keyboard[key.J]:
-                if self.target.x <= windowX/2 + (70*windowX/1440):
-                    self.target.x = windowX/2 + (70*windowX/1440)
-                else:
-                    self.target.do(MoveBy(((-20 * (windowX / 1440)) / (displayfrequency/60), 0), 0))
+                    self.target.do(MoveBy((0, (-20 * (windowY / 900)) / (displayfrequency / 60)), 0))
             if keyboard[key.J] and not keyboard[key.L]:
-                if self.target.x >= windowX - (200 * (windowX / 1440)):
-                    self.target.x = windowX - (200 * (windowX / 1440))
+                if self.target.x >= windowX - 200 * (windowX / 1440):
+                    self.target.x = windowX - 200 * (windowX / 1440)
+                elif keyboard[key.I]:
+                    self.target.do(MoveBy((((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.K]:
+                    self.target.do(MoveBy((((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((20 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
+            if keyboard[key.L] and not keyboard[key.J]:
+                if self.target.x <= windowX / 2 + (70 * windowX / 1440):
+                    self.target.x = windowX / 2 + (70 * windowX / 1440)
+                elif keyboard[key.I]:
+                    self.target.do(MoveBy(((-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           (-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                elif keyboard[key.K]:
+                    self.target.do(MoveBy(((-(((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60),
+                                           ((((20**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
+                else:
+                    self.target.do(MoveBy(((-20 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
         else:
             pass
         global pacr
