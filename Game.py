@@ -311,7 +311,7 @@ class UpdateBarRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if pacrhp <= 0.0:
-            game_over()
+            director.director.push(FadeTransition(on_game_end('LEFT'), 3))
         else:
             self.target.set_progress(pacrhp*0.01)
 
@@ -319,7 +319,7 @@ class UpdateBarRight(cocos.actions.Action):
 class UpdateBarLeft(cocos.actions.Action):
     def step(self, dt):
         if paclhp <= 0.0:
-            game_over()
+            director.director.push(FadeTransition(on_game_end('RIGHT'), 3))
         else:
             self.target.set_progress(paclhp*0.01)
 
@@ -641,62 +641,6 @@ class MovePacr(cocos.actions.Move):
         pacr = self.target.position
 
 
-# End Game Scene
-class EndGame(Menu):
-    def __init__(self, winner):
-        super().__init__(winner + ' HAS WON!')
-
-        self.font_title = {'font_name': FN, 'font_size': 25 * ((windowX + windowY) / (1440 + 900)),
-                           'color': (255, 220, 50, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
-        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX + windowY) / (1440 + 900)),
-                          'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 30 * ((windowX + windowY) / (1440 + 900)),
-                                   'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
-        # Menu items incl. functions they trigger
-        self.items = []
-        self.items.append(MenuItem('PLAY AGAIN', self.start_game))
-        self.items[0].y = 80
-        self.items.append(MenuItem('OPTIONS', self.options))
-        self.items[1].y = 40
-        self.items.append(MenuItem('QUIT', self.quit))
-        self.selected = 0
-        self.create_menu(self.items, shake(), shake_back())
-
-    def start_game(self):
-        global paclhp, pacrhp, left_points, right_points, powerleft, powerright
-        paclhp = 100
-        pacrhp = 100
-        left_points = -1
-        right_points = 0
-        powerleft = -10.0
-        powerright = 5.0
-        director.director.push(MoveInRTransition(on_game_start(), 1))
-
-    def quit(self):
-        pyglet.app.exit()
-
-    def options(self):
-        pass
-
-    def on_key_press(self, symbol, modifiers):
-        if symbol in (key.ENTER, key.NUM_ENTER):
-            self._activate_item()
-            return True
-        elif symbol in (key.DOWN, key.UP, key.S, key.W):
-            if symbol == key.DOWN or symbol == key.S:
-                new_idx = self.selected_index + 1
-            elif symbol == key.UP or symbol == key.W:
-                new_idx = self.selected_index - 1
-            if new_idx < 0:
-                new_idx = len(self.children) - 1
-            elif new_idx > len(self.children) - 1:
-                new_idx = 0
-            self._select_item(new_idx)
-            return True
-        elif symbol in (key.Q, key.U, key.E, key.Q):
-            return True
-
-
 # MAIN MENU #
 class MainMenu(Menu):
     def __init__(self):
@@ -749,12 +693,30 @@ class MainMenu(Menu):
 
 
 class BackgroundLayer(cocos.layer.Layer):
-    def __init__(self):
+    def __init__(self, winner=None):
         super().__init__()
         bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
         bg.scale = 1.2 * ((windowX+windowY) / (1440+900))
         bg.position = ((windowX / 2) - (100 * (windowX/1440)), windowY/2)
         self.add(bg)
+        win = cocos.text.Label('WINNER', (-100, -100), font_name=FN, color=(0, 200, 30, 255),
+                               font_size=50, anchor_x='center', anchor_y='center')
+        lose = cocos.text.Label('LOSER', (-100, -100), font_name=FN, color=(200, 0, 10, 255),
+                                font_size=50, anchor_x='center', anchor_y='center')
+        if winner is None:
+            pass
+        elif 'LEFT' in winner:
+            win.position = (windowX*1.3/8, windowY*4/6)
+            lose.position = (windowX*6.7/8, windowY*4/6)
+            lose.rotation = 20
+            win.rotation = -20
+        elif 'RIGHT' in winner:
+            win.position = (windowX*6.7/8, windowY*4/6)
+            lose.position = (windowX*1.3/8, windowY*4/6)
+            lose.rotation = -20
+            win.rotation = 20
+        self.add(win)
+        self.add(lose)
 
 
 # MAIN DIRECTOR #
@@ -766,16 +728,10 @@ def on_game_start():
     return thisgamescene
 
 
-def game_over():
-    if paclhp > pacrhp:
-        director.director.push(FadeTransition(on_game_end('THE LEFT PLAYER'), 3))
-    else:
-        director.director.push(FadeTransition(on_game_end('THE RIGHT PLAYER'), 3))
-
-
 def on_game_end(winner):
     endscene = Scene()
-    endscene.add(EndGame(winner), z=-1, name="MENU")
+    endscene.add(MainMenu(), z=-2, name="MENU")
+    endscene.add(BackgroundLayer(winner), z=-3, name="BG")
     return endscene
 
 
