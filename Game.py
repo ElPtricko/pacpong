@@ -561,12 +561,12 @@ class MovePacl(cocos.actions.Move):
                 if self.target.y >= windowY-(200*(windowY/900)):
                     self.target.y = windowY-(200*(windowY/900))
                 else:
-                    self.target.do(MoveBy((0, (10*(windowY/900))/(displayfrequency/60)) * 2, 0))
+                    self.target.do(MoveBy((0, (10*(windowY/900))/(displayfrequency/60) * 2), 0))
             if keyboard[key.W] and not keyboard[key.S]:
                 if self.target.y <= (200*(windowY/900)):
                     self.target.y = 200*(windowY/900)
                 else:
-                    self.target.do(MoveBy((0, (-10*(windowY/900))/(displayfrequency/60)) * 2, 0))
+                    self.target.do(MoveBy((0, (-10*(windowY/900))/(displayfrequency/60) * 2), 0))
             if keyboard[key.A] and not keyboard[key.D]:
                 if self.target.x >= windowX/2-(70*windowX/1440):
                     self.target.x = windowX/2-(70*windowX/1440)
