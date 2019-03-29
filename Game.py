@@ -494,7 +494,7 @@ class MovePaddleRight(cocos.actions.Move):
 class MovePacl(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
-        if self.target.invert is False:
+        if self.target.invert is False and self.target.stop is False:
             if keyboard[key.W] and not keyboard[key.S]:
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
@@ -527,7 +527,7 @@ class MovePacl(cocos.actions.Move):
                                            (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
-        if self.target.invert is True:
+        if self.target.invert is True and self.target.stop is False:
             if keyboard[key.S] and not keyboard[key.W]:
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
@@ -569,7 +569,7 @@ class MovePacl(cocos.actions.Move):
 class MovePacr(cocos.actions.Move):
     def step(self, dt):
         super().step(dt)
-        if self.target.invert is False:
+        if self.target.invert is False and self.target.stop is False:
             if keyboard[key.I] and not keyboard[key.K]:
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
@@ -602,7 +602,7 @@ class MovePacr(cocos.actions.Move):
                                            (-(((10**2)/2)**0.5) * (windowY / 900)) / (displayfrequency / 60)), 0))
                 else:
                     self.target.do(MoveBy(((-10 * (windowX / 1440)) / (displayfrequency / 60), 0), 0))
-        if self.target.invert is True:
+        if self.target.invert is True and self.target.stop is False:
             if keyboard[key.K] and not keyboard[key.I]:
                 if self.target.y >= windowY - (200 * (windowY / 900)):
                     self.target.y = windowY - (200 * (windowY / 900))
@@ -665,6 +665,13 @@ class MainMenu(Menu):
         self.create_menu(self.items, shake(), shake_back())
 
     def start_game(self):
+        global paclhp, pacrhp, powerleft, powerright, left_points, right_points
+        paclhp = 100.0
+        pacrhp = 100.0
+        left_points = -1
+        right_points = 0
+        powerleft = -10.0
+        powerright = 5.0
         director.director.push(MoveInRTransition(on_game_start(), 1))
 
     def quit(self):
