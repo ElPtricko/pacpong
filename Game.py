@@ -73,6 +73,13 @@ class GameScene(cocos.layer.ColorLayer):
         self.GhostBall.do(MoveBall())
         self.pacright.do(MovePacr())
 
+    def practice_mode(self, dt):
+        global powerright, powerleft, paclhp, pacrhp
+        powerright = 100
+        powerleft = 100
+        paclhp = 100
+        pacrhp = 100
+
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft
         self.GhostBall.position = ballpos
@@ -146,6 +153,9 @@ class GameScene(cocos.layer.ColorLayer):
             self.paddleLeft.do(InvertControls())
             self.paddleLeft.do(Delay(4) + MoveNormalInv())
             powerright -= 50
+
+        if symbol is key.ESCAPE:
+            director.director.push(FadeTransition(on_game_end(), 1))
 
 
 class HealthBar(cocos.layer.ColorLayer):
@@ -658,7 +668,7 @@ class MainMenu(Menu):
         self.items = []
         self.items.append(MenuItem('PLAY', self.start_game))
         self.items[0].y = 80
-        self.items.append(MenuItem('OPTIONS', self.options))
+        self.items.append(MenuItem('PRACTICE', self.practice))
         self.items[1].y = 40
         self.items.append(MenuItem('QUIT', self.quit))
         self.selected = 0
@@ -677,8 +687,8 @@ class MainMenu(Menu):
     def quit(self):
         pyglet.app.exit()
 
-    def options(self):
-        pass
+    def practice(self):
+        director.director.push(FadeTransition(on_practice_start(), 1))
 
     def on_key_press(self, symbol, modifiers):
         if symbol in (key.ENTER, key.NUM_ENTER):
@@ -730,12 +740,20 @@ class BackgroundLayer(cocos.layer.Layer):
 def on_game_start():
     thisgamescene = Scene()
     thisgamescene.add(GameScene(), z=-1, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.5)
+    thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.55)
     thisgamescene.schedule_interval(PowerBar().update_bar, 1/20)
     return thisgamescene
 
 
-def on_game_end(winner):
+def on_practice_start():
+    practice = Scene()
+    practice.add(GameScene(), z=-1, name="Game")
+    practice.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144) * 1.55)
+    practice.schedule_interval(GameScene().practice_mode, 1/20)
+    return practice
+
+
+def on_game_end(winner=None):
     endscene = Scene()
     endscene.add(MainMenu(), z=-2, name="MENU")
     endscene.add(BackgroundLayer(winner), z=-3, name="BG")
