@@ -774,7 +774,7 @@ class MainMenu(Menu):
         if symbol in (key.ENTER, key.NUM_ENTER):
             self._activate_item()
             return True
-        elif symbol in (key.DOWN, key.UP, key.S, key.W):
+        elif symbol in (key.DOWN, key.UP, key.S, key.W, key.I, key.K):
             if symbol == key.DOWN or symbol == key.S:
                 new_idx = self.selected_index+1
             elif symbol == key.UP or symbol == key.W:
@@ -785,7 +785,7 @@ class MainMenu(Menu):
                 new_idx = 0
             self._select_item(new_idx)
             return True
-        elif symbol in (key.Q, key.PERIOD, key.Z, key.Q):
+        elif symbol in (key.Q, key.PERIOD, key.Z, key.O):
             return True
 
 
