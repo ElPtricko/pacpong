@@ -71,6 +71,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.healthbar)
         self.power = PowerBar()
         self.add(self.power)
+        self.add(PowersIndicator())
 
         self.pointsl.do(PointslAction())
         self.pointsr.do(PointsrAction())
@@ -134,7 +135,7 @@ class GameScene(cocos.layer.ColorLayer):
             paclhp += 25
             powerleft -= 40
             self.heal.do(MoveTo(pacl, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
-                         +ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
+                         + ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.8)+MoveNormal())
         if powerright > 35 and symbol == key.N:

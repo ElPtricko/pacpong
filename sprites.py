@@ -78,3 +78,11 @@ class Bg(cocos.sprite.Sprite):
         self.scale_x = windowX/self.width
         self.scale_y = (windowY-80*(windowY/900))/self.height
         self.position = windowX/2, (windowY/2-40*(windowY/900))
+
+
+class PowersIndicator(cocos.sprite.Sprite):
+    def __init__(self):
+        super().__init__(pyglet.resource.image('powers.png'))
+        self.scale_x = 0.32
+        self.scale_y = 0.35
+        self.position = (windowX/2, self.height/2 + 20)
