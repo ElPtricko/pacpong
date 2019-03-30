@@ -231,12 +231,12 @@ class PowerBar(cocos.layer.ColorLayer):
                                                      self.progressbar2.position[1]+self.progressbar2.height/2),
                                   color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
-        power = cocos.text.Label("%d | 100"%powerleft,
+        power = cocos.text.Label("%d | 100" % powerleft,
                                  position=(self.progressbar.position[0]+20*(windowX/1440),
                                            self.progressbar.position[1]+self.progressbar.height/2),
                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
                                  anchor_x='left', anchor_y='center')
-        power2 = cocos.text.Label("%d | 100"%powerright,
+        power2 = cocos.text.Label("%d | 100" % powerright,
                                   position=(self.progressbar2.position[0]+self.progressbar2.width-20*(windowX/1440),
                                             self.progressbar2.position[1]+self.progressbar2.height/2),
                                   color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
@@ -796,11 +796,18 @@ class BackgroundLayer(cocos.layer.Layer):
         bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
         bg.scale = 1.2*((windowX+windowY)/(1440+900))
         bg.position = ((windowX/2)-(100*(windowX/1440)), windowY/2)
-        self.add(bg)
+        banana = []
+
         win = cocos.text.Label('WINNER', (-100, -100), font_name=FN, color=(0, 200, 30, 255),
                                font_size=50, anchor_x='center', anchor_y='center')
         lose = cocos.text.Label('LOSER', (-100, -100), font_name=FN, color=(200, 0, 10, 255),
                                 font_size=50, anchor_x='center', anchor_y='center')
+        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT', (windowX-50, 100), font_name=FN,
+                                    color=(100, 100, 100, 255), font_size=11, anchor_x='right', anchor_y='bottom')
+        credits2 = cocos.text.Label('DESIGNER   -   ADRI EVANS', (windowX-50, 50), font_name=FN,
+                                    color=(100, 100, 100, 255), font_size=11, anchor_x='right', anchor_y='bottom')
+        credits3 = cocos.text.Label('CONCEPT   -   BAUTISTA CAZEAUX', (windowX-50, 150), font_name=FN,
+                                    color=(100, 100, 100, 255), font_size=11, anchor_x='right', anchor_y='bottom')
         if winner is None:
             pass
         elif 'LEFT' in winner:
@@ -813,8 +820,12 @@ class BackgroundLayer(cocos.layer.Layer):
             lose.position = (windowX*1.3/8, windowY*4/6)
             lose.rotation = -20
             win.rotation = 20
+        self.add(TheGoldenBanana(50)) # Just for the memes
         self.add(win)
         self.add(lose)
+        self.add(credits1)
+        self.add(credits2)
+        self.add(credits3)
 
 
 # MAIN DIRECTOR #

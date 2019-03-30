@@ -86,3 +86,34 @@ class PowersIndicator(cocos.sprite.Sprite):
         self.scale_x = 0.32
         self.scale_y = 0.35
         self.position = (windowX/2, self.height/2 + 20)
+
+
+class TheGoldenBanana(cocos.layer.Layer):
+    def __init__(self, amount): # memes
+        super().__init__() # memes
+        banana = []# memes
+        import random
+        for x in range(0, amount):# memes
+            banana.append(cocos.sprite.Sprite(pyglet.resource.animation('banana.gif')))
+            banana[x].scale = 1/((amount/1.5)**0.5) * ((windowX+windowY) / (1440+900))
+            if x is not 0 and banana[x-1].x > windowX/2 and banana[x-1].y > windowY/2:
+                banana[x].position = (random.randrange(banana[x].width//2, banana[x-1].x - banana[x].width//2),# memes
+                                      random.randrange(banana[x].height//2, banana[x-1].y - banana[x].height//2))
+            elif x is not 0 and banana[x-1].x < windowX/2 and banana[x-1].y > windowY/2:
+                banana[x].position = (random.randrange(banana[x-1].x + banana[x].width//2,
+                                                       windowX - banana[x].width//2),# memes
+                                      random.randrange(banana[x].height//2, banana[x-1].y - banana[x].height//2))
+            elif x is not 0 and banana[x-1].x < windowX/2 and banana[x-1].y < windowY/2:
+                banana[x].position = (random.randrange(banana[x-1].x + banana[x].width//2,
+                                                       windowX - banana[x].width//2),# memes
+                                      random.randrange(banana[x-1].y + banana[x].height//2,
+                                                       windowY - banana[x].height//2))
+            elif x is not 0 and banana[x-1].x > windowX/2 and banana[x-1].y < windowY/2:
+                banana[x].position = (random.randrange(banana[x].width//2, banana[x-1].x - banana[x].width//2),
+                                      random.randrange(banana[x-1].y + banana[x].height//2,
+                                                       windowY - banana[x].height//2))
+            else:# memes
+                banana[x].position = (random.randrange(banana[x].width//2, windowX-banana[x].width//2),
+                                      random.randrange(banana[x].height//2, windowY-banana[x].height//2))
+            self.add(banana[x])# memes
+
