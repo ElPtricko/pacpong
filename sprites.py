@@ -4,8 +4,8 @@ from glvars import *
 
 
 class Paddle(cocos.sprite.Sprite):
-    def __init__(self, img, side):
-        super().__init__(pyglet.resource.image(img))
+    def __init__(self, side):
+        super().__init__(pyglet.resource.image('paddle.png'))
         self.velocity = (0, 0)
         self.invert = False
         self.stop = False
@@ -19,8 +19,8 @@ class Paddle(cocos.sprite.Sprite):
 
 
 class GhostBall(cocos.sprite.Sprite):
-    def __init__(self, img):
-        super().__init__(pyglet.resource.image(img))
+    def __init__(self):
+        super().__init__(pyglet.resource.image('ghost.png'))
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.6 * (windowX/1440)
         self.color = (100, 255, 0)
@@ -32,18 +32,18 @@ class GhostBall(cocos.sprite.Sprite):
 
 
 class PacBall(cocos.sprite.Sprite):
-    def __init__(self, img, color, side):
-        super().__init__(img)
+    def __init__(self, color, side):
+        super().__init__(None)
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.5 * (windowX/1440)
         self.color = color
         self.invert = False
         self.stop = False
         if side is 'left':
-            self.image = pyglet.resource.image(img)
+            self.image = pyglet.resource.image('pacball.png')
             self.position = (windowX/4), (windowY/2)
         if side is 'right':
-            self.image = pyglet.resource.image(img, flip_x=True)
+            self.image = pyglet.resource.image('pacball.png', flip_x=True)
             self.position = ((windowX/4)*3, windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
