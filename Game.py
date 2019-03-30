@@ -25,7 +25,6 @@ class GameScene(cocos.layer.ColorLayer):
         self.pointsl = cocos.text.Label('POINTS: '+str(left_points), ((120*(windowX/1440)), 50*(windowY/900)),
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        self.add(self.pointsl)
         self.pointsr = cocos.text.Label('POINTS: '+str(right_points), ((windowX-120*(windowX/1440)),
                                                                        50*(windowY/900)),
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
@@ -37,41 +36,37 @@ class GameScene(cocos.layer.ColorLayer):
                         MoveBy((0, 70*(windowY/900)), 0.63)+
                         MoveBy((0, -70*(windowY/900)), 0.3)+
                         MoveBy((135*(windowX/1440), 0), 0.3))
-        self.add(self.pointsr)
-
-        # Paddles
         self.paddleLeft = Paddle("paddle.png", 'left')
         self.add(self.paddleLeft, z=1)
         self.paddleRight = Paddle("paddle.png", 'right')
         self.add(self.paddleRight, z=1)
-
-        # Ghost Ball
         self.GhostBall = GhostBall("ghost.png")
         self.add(self.GhostBall)
-        # Pac ball
         self.pacleft = PacBall("pacball.png", (255, 0, 0), 'left')
-        self.add(self.pacleft)
         self.pacright = PacBall("pacball.png", (200, 200, 200), 'right')
-        self.add(self.pacright)
-
         self.coll_manager = cm.CollisionManagerBruteForce()
         self.fireball = FireBall()
-        self.add(self.fireball)
         self.fireball2 = FireBall('flip')
-        self.add(self.fireball2)
         self.heal = Healing()
-        self.add(self.heal)
         self.heal2 = Healing()
-        self.add(self.heal2)
         self.speed = SpeedUp()
-        self.add(self.speed)
         self.speed2 = SpeedUp()
-        self.add(self.speed2)
         self.healthbar = HealthBar()
-        self.add(self.healthbar)
-        self.power = PowerBar()
-        self.add(self.power)
         self.add(PowersIndicator())
+        self.power = PowerBar()
+
+        self.add(self.pointsl)
+        self.add(self.pointsr)
+        self.add(self.pacright)
+        self.add(self.pacleft)
+        self.add(self.fireball)
+        self.add(self.fireball2)
+        self.add(self.heal)
+        self.add(self.heal2)
+        self.add(self.speed)
+        self.add(self.speed2)
+        self.add(self.healthbar)
+        self.add(self.power)
 
         self.pointsl.do(PointslAction())
         self.pointsr.do(PointsrAction())
@@ -83,10 +78,18 @@ class GameScene(cocos.layer.ColorLayer):
 
     def practice_mode(self, dt):
         global powerright, powerleft, paclhp, pacrhp
-        powerright = 100
-        powerleft = 100
-        paclhp = 100
-        pacrhp = 100
+        if paclhp < 100:
+            if paclhp < 50:
+                paclhp += 20
+            paclhp += 1
+        if pacrhp < 100:
+            if pacrhp < 50:
+                pacrhp += 20
+            pacrhp += 1
+        if powerright < 100:
+            powerright += 4
+        if powerleft < 100:
+            powerleft += 4
 
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft
@@ -95,13 +98,11 @@ class GameScene(cocos.layer.ColorLayer):
         self.paddleRight.position = pr
         self.pacright.position = pacr
         self.pacleft.position = pacl
-
         self.GhostBall.cshape.center = eu.Vector2(*self.GhostBall.position)
         self.paddleLeft.cshape.center = eu.Vector2(*self.paddleLeft.position)
         self.paddleRight.cshape.center = eu.Vector2(*self.paddleRight.position)
         self.pacleft.cshape.center = eu.Vector2(*self.pacleft.position)
         self.pacright.cshape.center = eu.Vector2(*self.pacright.position)
-
         if self.coll_manager.they_collide(self.GhostBall, self.paddleRight):
             ballCollidingR = True
             powerright += 10
@@ -149,17 +150,17 @@ class GameScene(cocos.layer.ColorLayer):
             self.speed.do(MoveTo((windowX/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0) +
                           Delay(4)+MoveTo((-1000, -1000), 0))
             self.pacright.do(InvertControls())
-            self.pacright.do(Delay(4)+MoveNormalInv())
+            self.pacright.do(Delay(4)+NoInvert())
             self.paddleRight.do(InvertControls())
-            self.paddleRight.do(Delay(4)+MoveNormalInv())
+            self.paddleRight.do(Delay(4)+NoInvert())
             powerleft -= 50
         if powerright > 50 and symbol == key.H:
             self.speed2.do(MoveTo((windowX/2-self.speed2.width/2, windowY/2), 0)+Delay(4) +
                            MoveTo((-1000, -1000), 0))
             self.pacleft.do(InvertControls())
-            self.pacleft.do(Delay(4)+MoveNormalInv())
+            self.pacleft.do(Delay(4)+NoInvert())
             self.paddleLeft.do(InvertControls())
-            self.paddleLeft.do(Delay(4)+MoveNormalInv())
+            self.paddleLeft.do(Delay(4)+NoInvert())
             powerright -= 50
 
         if symbol is key.ESCAPE:
@@ -171,9 +172,9 @@ class HealthBar(cocos.layer.ColorLayer):
         w, h = director.director.get_window_size()
         super(HealthBar, self).__init__(100, 100, 200, 0, width=w-6, height=40)
         self.position = (3, h-43)
-        self.progressbar = ProgressBar(int(self.width/2), 40)
+        self.progressbar = ProgressBar(self.width//2, 40)
         self.progressbar.position = 0, 0
-        self.progressbar2 = ProgressBar(int(self.width/2), 40)
+        self.progressbar2 = ProgressBar(self.width//2, 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
 
         label = cocos.text.Label("HEALTH", position=(self.progressbar.position[0]+
@@ -198,14 +199,14 @@ class HealthBar(cocos.layer.ColorLayer):
 
         self.add(self.progressbar)
         self.add(self.progressbar2)
-        self.progressbar2.do(UpdateBarRight())
-        self.progressbar.do(UpdateBarLeft())
-        health.do(UpdateHealthLeft())
-        health2.do(UpdateHealthRight())
         self.add(health)
         self.add(health2)
         self.add(label)
         self.add(label2)
+        self.progressbar.do(UpdateHealthLeft())
+        self.progressbar2.do(UpdateHealthRight())
+        health.do(UpdateHealthTL())
+        health2.do(UpdateHealthTR())
 
 
 class PowerBar(cocos.layer.ColorLayer):
@@ -217,10 +218,8 @@ class PowerBar(cocos.layer.ColorLayer):
         self.position = (3, h-83)
         self.progressbar = ProgressPowerBar(int(self.width/2), 40)
         self.progressbar.position = 0, 0
-        self.add(self.progressbar)
         self.progressbar2 = ProgressPowerBar(int(self.width/2), 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
-        self.add(self.progressbar2)
         label = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
                                                     self.progressbar.width-20*(windowX/1440),
                                                     self.progressbar.position[1]+self.progressbar.height/2),
@@ -231,26 +230,26 @@ class PowerBar(cocos.layer.ColorLayer):
                                                      self.progressbar2.position[1]+self.progressbar2.height/2),
                                   color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
-        power = cocos.text.Label("%d | 100" % powerleft,
+        power = cocos.text.Label("0 | 100",
                                  position=(self.progressbar.position[0]+20*(windowX/1440),
                                            self.progressbar.position[1]+self.progressbar.height/2),
                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
                                  anchor_x='left', anchor_y='center')
-        power2 = cocos.text.Label("%d | 100" % powerright,
+        power2 = cocos.text.Label("0 | 100",
                                   position=(self.progressbar2.position[0]+self.progressbar2.width-20*(windowX/1440),
                                             self.progressbar2.position[1]+self.progressbar2.height/2),
                                   color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
                                   anchor_x='right', anchor_y='center')
-        self.progressbar.set_progress(powerleft)
-        self.progressbar2.set_progress(powerright)
-        self.progressbar.do(UpdatePowerLeft())
-        self.progressbar2.do(UpdatePowerRight())
-        power.do(UpdatePowerTL())
-        power2.do(UpdatePowerTR())
+        self.add(self.progressbar)
+        self.add(self.progressbar2)
         self.add(power)
         self.add(power2)
         self.add(label)
         self.add(label2)
+        self.progressbar.do(UpdatePowerLeft())
+        self.progressbar2.do(UpdatePowerRight())
+        power.do(UpdatePowerTL())
+        power2.do(UpdatePowerTR())
 
     def update_bar(self, dt):
         global powerright, powerleft
@@ -269,72 +268,50 @@ class NoMove(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.stop = True
-
-
 class MoveNormal(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.stop = False
-
-
-class MoveNormalInv(cocos.actions.Action):
+class NoInvert(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.invert = False
-
-
 class InvertControls(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.invert = True
-
-
 class UpdatePowerTR(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%powerright
-
-
+        self.target.element.text = '%d | 100' % powerright
 class UpdatePowerTL(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%powerleft
-
-
-class UpdateHealthRight(cocos.actions.Action):
+        self.target.element.text = '%d | 100' % powerleft
+class UpdateHealthTR(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%pacrhp
-
-
-class UpdateHealthLeft(cocos.actions.Action):
+        self.target.element.text = '%d | 100' % pacrhp
+class UpdateHealthTL(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%paclhp
-
-
+        self.target.element.text = '%d | 100' % paclhp
 class UpdatePowerRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.set_progress(powerright*0.01)
-
-
 class UpdatePowerLeft(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.set_progress(powerleft*0.01)
-
-
-class UpdateBarRight(cocos.actions.Action):
+class UpdateHealthRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if pacrhp <= 0.0:
             director.director.push(FadeTransition(on_game_end('LEFT'), 3))
         else:
             self.target.set_progress(pacrhp*0.01)
-
-
-class UpdateBarLeft(cocos.actions.Action):
+class UpdateHealthLeft(cocos.actions.Action):
     def step(self, dt):
         if paclhp <= 0.0:
             director.director.push(FadeTransition(on_game_end('RIGHT'), 3))
@@ -793,9 +770,6 @@ class MainMenu(Menu):
 class BackgroundLayer(cocos.layer.Layer):
     def __init__(self, winner=None):
         super().__init__()
-        bg = cocos.sprite.Sprite(pyglet.resource.animation('bg.gif'))
-        bg.scale = 1.2*((windowX+windowY)/(1440+900))
-        bg.position = ((windowX/2)-(100*(windowX/1440)), windowY/2)
         win = cocos.text.Label('WINNER', (-100, -100), font_name=FN, color=(0, 200, 30, 255),
                                font_size=50, anchor_x='center', anchor_y='center')
         lose = cocos.text.Label('LOSER', (-100, -100), font_name=FN, color=(200, 0, 10, 255),
@@ -840,6 +814,7 @@ def on_practice_start():
     practice.add(GameScene(), z=-1, name="Game")
     practice.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144)*1.55)
     practice.schedule_interval(GameScene().practice_mode, 1/20)
+    practice.schedule_interval(PowerBar().update_bar, 1/20)
     return practice
 
 
