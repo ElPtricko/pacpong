@@ -33,7 +33,7 @@ class GhostBall(cocos.sprite.Sprite):
 
 class PacBall(cocos.sprite.Sprite):
     def __init__(self, color, side):
-        super().__init__(None)
+        super().__init__('pacball.png')
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.5 * (windowX/1440)
         self.color = color
