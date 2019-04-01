@@ -19,14 +19,18 @@ class Paddle(cocos.sprite.Sprite):
 
 
 class GhostBall(cocos.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, practice):
         super().__init__(pyglet.resource.image('ghost.png'))
         self.velocity = (0, 0)
         self.scale_x = self.scale_y = 0.6 * (windowX/1440)
         self.color = (100, 255, 0)
-        self.dx = (14.4 * (windowX/1440)) / (displayfrequency/60)
+        if practice is True:
+            self.dx = -1 * (14.4 * (windowX/1440)) / (displayfrequency/60)
+            self.position = (500*(windowX/1440)), (windowY/2)
+        else:
+            self.dx = (14.4 * (windowX/1440)) / (displayfrequency/60)
+            self.position = (windowX-500*(windowX/1440)), (windowY/2)
         self.dy = (14.4 * (windowY/900)) / (displayfrequency/60)
-        self.position = (windowX - 500 * (windowX/1440)), (windowY/2)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
         self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
 
@@ -41,10 +45,10 @@ class PacBall(cocos.sprite.Sprite):
         self.stop = False
         if side is 'left':
             self.image = pyglet.resource.image('pacball.png')
-            self.position = (windowX/4), (windowY/2)
+            self.position = (windowX/4), (windowY/2) + self.width/3
         if side is 'right':
             self.image = pyglet.resource.image('pacball.png', flip_x=True)
-            self.position = ((windowX/4)*3, windowY/2)
+            self.position = ((windowX/4)*3, windowY/2 + self.width/3)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
 
@@ -76,8 +80,8 @@ class Bg(cocos.sprite.Sprite):
     def __init__(self, img):
         super().__init__(pyglet.resource.image(img))
         self.scale_x = windowX/self.width
-        self.scale_y = (windowY-80*(windowY/900))/self.height
-        self.position = windowX/2, (windowY/2-40*(windowY/900))
+        self.scale_y = windowY/self.height
+        self.position = windowX/2, (windowY/2)
 
 
 class PowersIndicator(cocos.sprite.Sprite):
@@ -89,31 +93,31 @@ class PowersIndicator(cocos.sprite.Sprite):
 
 
 class TheGoldenBanana(cocos.layer.Layer):
-    def __init__(self, amount): # memes
-        super().__init__() # memes
-        banana = []# memes
+    def __init__(self, amount):
+        super().__init__()
+        banana = []
         import random
-        for x in range(0, amount):# memes
+        for x in range(0, amount):
             banana.append(cocos.sprite.Sprite(pyglet.resource.animation('banana.gif')))
             banana[x].scale = 1/((amount/1.5)**0.5) * ((windowX+windowY) / (1440+900))
             if x is not 0 and banana[x-1].x > windowX/2 and banana[x-1].y > windowY/2:
-                banana[x].position = (random.randrange(banana[x].width//2, banana[x-1].x - banana[x].width//2),# memes
+                banana[x].position = (random.randrange(banana[x].width//2, banana[x-1].x - banana[x].width//2),
                                       random.randrange(banana[x].height//2, banana[x-1].y - banana[x].height//2))
             elif x is not 0 and banana[x-1].x < windowX/2 and banana[x-1].y > windowY/2:
                 banana[x].position = (random.randrange(banana[x-1].x + banana[x].width//2,
-                                                       windowX - banana[x].width//2),# memes
+                                                       windowX - banana[x].width//2),
                                       random.randrange(banana[x].height//2, banana[x-1].y - banana[x].height//2))
             elif x is not 0 and banana[x-1].x < windowX/2 and banana[x-1].y < windowY/2:
                 banana[x].position = (random.randrange(banana[x-1].x + banana[x].width//2,
-                                                       windowX - banana[x].width//2),# memes
+                                                       windowX - banana[x].width//2),
                                       random.randrange(banana[x-1].y + banana[x].height//2,
                                                        windowY - banana[x].height//2))
             elif x is not 0 and banana[x-1].x > windowX/2 and banana[x-1].y < windowY/2:
                 banana[x].position = (random.randrange(banana[x].width//2, banana[x-1].x - banana[x].width//2),
                                       random.randrange(banana[x-1].y + banana[x].height//2,
                                                        windowY - banana[x].height//2))
-            else:# memes
+            else:
                 banana[x].position = (random.randrange(banana[x].width//2, windowX-banana[x].width//2),
                                       random.randrange(banana[x].height//2, windowY-banana[x].height//2))
-            self.add(banana[x])# memes
+            self.add(banana[x])
 
