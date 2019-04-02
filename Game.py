@@ -145,15 +145,15 @@ class GameScene(cocos.layer.ColorLayer):
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.3)+MoveNormal())
         if powerleft > 35 and symbol == key.V:
-            paclhp += 25
-            powerleft -= 40
+            paclhp += 20
+            powerleft -= 35
             self.heal.do(MoveTo(pacl, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
                          +ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.8)+MoveNormal())
         if powerright > 35 and symbol == key.N:
-            pacrhp += 25
-            powerright -= 40
+            pacrhp += 20
+            powerright -= 35
             self.heal2.do(MoveTo(pacr, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
                           +ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacright.do(NoMove())

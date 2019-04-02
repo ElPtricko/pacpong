@@ -1,10 +1,11 @@
 import platform
 from pyglet import *
 
-font.add_file('resources/Splatch.ttf')
-FN = 'Splatch'
+
 resource.path = ['resources']
 resource.reindex()
+resource.add_font('Splatch.ttf')
+FN = 'Splatch'
 ballpos = (5, 0)
 pl = (500, 500)
 pr = (1000, 1000)
