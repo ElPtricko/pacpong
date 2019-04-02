@@ -2,8 +2,9 @@ from cx_Freeze import setup, Executable
 import sys
 # import os.path
 
-build_exe_options = {"packages": ["os", "cocos", "pyglet", "win32api",
-                                  "random"],
+build_exe_options = {"packages": ["os", "cocos", "pyglet", "random"
+                                  # "AppKit", "pkg_resources._vendor", "_sysconfigdata_m_darwin_darwin",
+                                  ],
                      "includes": ["pyglet.resource"],
                      "include_files": [# "tcl86t.dll", "tk86t.dll",
                                        "resources", "glvars.py"],

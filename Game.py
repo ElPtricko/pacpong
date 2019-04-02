@@ -11,7 +11,7 @@ from sprites import *
 class GameScene(cocos.layer.ColorLayer):
     is_event_handler = True
 
-    def __init__(self, practice=False):
+    def __init__(self, practice=False, timer=False):
         super(GameScene, self).__init__(0, 100, 175, 255)
         global paclhp, pacrhp, powerleft, powerright, left_points, right_points
         paclhp = 100.0
@@ -87,6 +87,16 @@ class GameScene(cocos.layer.ColorLayer):
         self.pacleft.do(MovePacl())
         self.GhostBall.do(MoveBall())
         self.pacright.do(MovePacr())
+        if timer is True:
+            global time
+            self.countdownlabel = cocos.text.Label('%d S' % 4, (windowX/2, windowY*9.5/11),
+                                                   font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
+                                                   color=(0, 0, 0, 255), anchor_x='center')
+            self.countdownlabel.do(UpdateCountdown())
+            self.add(self.countdownlabel)
+            time = 1800
+        else:
+            pass
 
     def practice_mode(self, dt):
         global powerright, powerleft, paclhp, pacrhp
@@ -103,8 +113,21 @@ class GameScene(cocos.layer.ColorLayer):
         if powerleft < 100:
             powerleft += 4
 
+    def countdown(self, dt):
+        global time
+        if -5 < time <= 0:
+            if paclhp*left_points == pacrhp*right_points:
+                director.director.push(FadeTransition(on_game_end('TIE'), 2))
+            elif paclhp*left_points < pacrhp*right_points:
+                director.director.push(FadeTransition(on_game_end('RIGHT'), 2))
+            else:
+                director.director.push(FadeTransition(on_game_end('LEFT'), 2))
+            time = -6
+        else:
+            time -= 1
+
     def updateobj(self, dt):
-        global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft
+        global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft, paclhp, pacrhp
         self.GhostBall.position = ballpos
         self.paddleLeft.position = pl
         self.paddleRight.position = pr
@@ -125,6 +148,12 @@ class GameScene(cocos.layer.ColorLayer):
             paccollisionl = True
         if self.coll_manager.they_collide(self.pacright, self.GhostBall):
             paccollisionr = True
+        if -50 < paclhp <= 0 < pacrhp:
+            paclhp = -60
+            director.director.push(FadeTransition(on_game_end('RIGHT'), 2))
+        elif -50 < pacrhp <= 0 < paclhp:
+            pacrhp = -60
+            director.director.push(FadeTransition(on_game_end('LEFT'), 2))
 
     def on_key_press(self, symbol, mod):
         global powerright, powerleft, paclhp, pacrhp
@@ -184,9 +213,9 @@ class HealthBar(cocos.layer.ColorLayer):
         w, h = director.director.get_window_size()
         super(HealthBar, self).__init__(100, 100, 200, 0, width=w-6, height=40)
         self.position = (3, h-43)
-        self.progressbar = ProgressBar(self.width//2, 40)
+        self.progressbar = ProgressBar(self.width//2-2, 40)
         self.progressbar.position = 0, 0
-        self.progressbar2 = ProgressBar(self.width//2, 40)
+        self.progressbar2 = ProgressBar(self.width//2-2, 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
 
         label = cocos.text.Label("HEALTH", position=(self.progressbar.position[0]+
@@ -227,10 +256,10 @@ class PowerBar(cocos.layer.ColorLayer):
     def __init__(self):
         w, h = director.director.get_window_size()
         super(PowerBar, self).__init__(100, 100, 200, 0, width=w-6, height=40)
-        self.position = (3, h-83)
-        self.progressbar = ProgressPowerBar(int(self.width/2), 40)
+        self.position = (3, h-87)
+        self.progressbar = ProgressPowerBar(self.width//2-2, 40)
         self.progressbar.position = 0, 0
-        self.progressbar2 = ProgressPowerBar(int(self.width/2), 40)
+        self.progressbar2 = ProgressPowerBar(self.width//2-2, 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
         label = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
                                                     self.progressbar.width-20*(windowX/1440),
@@ -320,15 +349,23 @@ class UpdateHealthRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if pacrhp <= 0.0:
-            director.director.push(FadeTransition(on_game_end('LEFT'), 3))
+            pass
         else:
             self.target.set_progress(pacrhp*0.01)
 class UpdateHealthLeft(cocos.actions.Action):
     def step(self, dt):
+        super().step(dt)
         if paclhp <= 0.0:
-            director.director.push(FadeTransition(on_game_end('RIGHT'), 3))
+            pass
         else:
             self.target.set_progress(paclhp*0.01)
+class UpdateCountdown(cocos.actions.Action):
+    def step(self, dt):
+        super().step(dt)
+        if time < 0:
+            pass
+        else:
+            self.target.element.text = '%.1f S' % (time*0.1)
 
 
 class PointslAction(cocos.actions.Action):
@@ -736,25 +773,30 @@ class MainMenu(Menu):
                            'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
         self.font_item = {'font_name': FN, 'font_size': 20*((windowX+windowY)/(1440+900)),
                           'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 30*((windowX+windowY)/(1440+900)),
+        self.font_item_selected = {'font_name': FN, 'font_size': 25*((windowX+windowY)/(1440+900)),
                                    'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
         self.items = []
-        self.items.append(MenuItem('PLAY', self.start_game))
-        self.items[0].y = 80
-        self.items.append(MenuItem('PRACTICE', self.practice))
-        self.items[1].y = 40
+        self.items.append(MenuItem('NORMAL MODE', self.start_game))
+        self.items.append(MenuItem('COUNTDOWN MODE', self.countdown_mode))
+        self.items.append(MenuItem('PRACTICE MODE', self.practice))
         self.items.append(MenuItem('QUIT', self.quit))
         self.selected = 0
+        self.items[0].y = 30
+        self.items[1].y = 20
+        self.items[2].y = 10
         self.create_menu(self.items, shake(), shake_back())
 
     def start_game(self):
-        director.director.push(MoveInRTransition(on_game_start(), 1))
+        director.director.push(MoveInRTransition(on_game_start(False, False), 1))
+
+    def countdown_mode(self):
+        director.director.push(MoveInTTransition(on_game_start(False, True), 1))
+
+    def practice(self):
+        director.director.push(MoveInLTransition(on_game_start(True, False), 1))
 
     def quit(self):
         pyglet.app.exit()
-
-    def practice(self):
-        director.director.push(MoveInLTransition(on_practice_start(), 1))
 
     def on_key_press(self, symbol, modifiers):
         if symbol in (key.ENTER, key.NUM_ENTER):
@@ -778,53 +820,66 @@ class MainMenu(Menu):
 class BackgroundLayer(cocos.layer.Layer):
     def __init__(self, winner=None):
         super().__init__()
-        win = cocos.text.Label('WINNER', (-100, -100), font_name=FN, color=(0, 200, 30, 255),
-                               font_size=50, anchor_x='center', anchor_y='center')
-        lose = cocos.text.Label('LOSER', (-100, -100), font_name=FN, color=(200, 0, 10, 255),
-                                font_size=50, anchor_x='center', anchor_y='center')
-        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT', (windowX-50, 100), font_name=FN,
-                                    color=(150, 150, 150, 255), font_size=11, anchor_x='right', anchor_y='bottom')
-        credits2 = cocos.text.Label('DESIGNER   -   ADRI EVANS', (windowX-50, 50), font_name=FN,
-                                    color=(150, 150, 150, 255), font_size=11, anchor_x='right', anchor_y='bottom')
-        credits3 = cocos.text.Label('CONCEPT   -   BAUTISTA CAZEAUX', (windowX-50, 150), font_name=FN,
-                                    color=(150, 150, 150, 255), font_size=11, anchor_x='right', anchor_y='bottom')
-        if winner is None:
-            pass
-        elif 'LEFT' in winner:
-            win.position = (windowX*1.3/8, windowY*4/6)
-            lose.position = (windowX*6.7/8, windowY*4/6)
-            lose.rotation = 20
-            win.rotation = -20
-        elif 'RIGHT' in winner:
-            win.position = (windowX*6.7/8, windowY*4/6)
-            lose.position = (windowX*1.3/8, windowY*4/6)
-            lose.rotation = -20
-            win.rotation = 20
+        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT', (windowX-(50*windowX/1440), 80*(windowY/900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right', anchor_y='bottom')
+        credits2 = cocos.text.Label('DESIGNER   -   ADRI EVANS', (windowX-(50*windowX/1440), 40*(windowY/900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right', anchor_y='bottom')
+        credits3 = cocos.text.Label('BAUTISTA CAZEAUX  -  CONCEPT & MARKETING', ((50*windowX/1440), 80*(windowY/900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='left', anchor_y='bottom')
+        credits4 = cocos.text.Label('PABLO PAZOS  -  MARKETING', ((50*windowX/1440), 40*(windowY/900)), font_name=FN,
+                                    color=(150, 150, 150, 255), font_size=11*((windowX+windowY)/(1440+900)),
+                                    anchor_x='left', anchor_y='bottom')
         self.add(Bg('bg1.png'))
         self.add(cocos.layer.ColorLayer(0, 0, 0, 150, windowX, windowY))
-        self.add(win)
-        self.add(lose)
         self.add(credits1)
         self.add(credits2)
         self.add(credits3)
+        self.add(credits4)
+        if winner is None:
+            pass
+        elif 'LEFT' in winner:
+            win = cocos.text.Label('WINNER', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(0, 200, 30, 255),
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(200, 0, 10, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose.rotation = 20
+            win.rotation = -20
+            self.add(win)
+            self.add(lose)
+        elif 'RIGHT' in winner:
+            win = cocos.text.Label('WINNER', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(0, 200, 30, 255),
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(200, 0, 10, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose.rotation = -20
+            win.rotation = 20
+            self.add(win)
+            self.add(lose)
+        elif 'TIE' in winner:
+            win = cocos.text.Label('TIED', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(200, 200, 0, 255),
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose = cocos.text.Label('TIED', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(200, 200, 0, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            lose.rotation = 20
+            win.rotation = -20
+            self.add(win)
+            self.add(lose)
 
 
 # MAIN DIRECTOR #
-def on_game_start():
+def on_game_start(practice=False, timer=False):
     thisgamescene = Scene()
-    thisgamescene.add(GameScene(), z=-1, name="Game")
-    thisgamescene.schedule_interval(GameScene().updateobj, (1/60)/(displayfrequency/144)*1.55)
+    thisgamescene.add(GameScene(practice, timer), z=-1, name="Game")
+    thisgamescene.schedule_interval(GameScene(practice, timer).updateobj, (1/60)/(displayfrequency/144)*1.55)
     thisgamescene.schedule_interval(PowerBar().update_bar, 1/20)
+    if practice:
+        thisgamescene.schedule_interval(GameScene(True, False).practice_mode, 1/20)
+    elif timer:
+        thisgamescene.schedule_interval(GameScene(False, True).countdown, 1/10)
     return thisgamescene
-
-
-def on_practice_start():
-    practice = Scene()
-    practice.add(GameScene(True), z=-1, name="Game")
-    practice.schedule_interval(GameScene(True).updateobj, (1/60)/(displayfrequency/144)*1.55)
-    practice.schedule_interval(GameScene(True).practice_mode, 1/20)
-    practice.schedule_interval(PowerBar().update_bar, 1/20)
-    return practice
 
 
 def on_game_end(winner=None):
