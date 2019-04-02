@@ -332,11 +332,17 @@ class UpdatePowerTL(cocos.actions.Action):
 class UpdateHealthTR(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%pacrhp
+        if pacrhp < 0:
+            self.target.element.text = '0 | 100'
+        else:
+            self.target.element.text = '%d | 100'%pacrhp
 class UpdateHealthTL(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
-        self.target.element.text = '%d | 100'%paclhp
+        if paclhp < 0:
+            self.target.element.text = '0 | 100'
+        else:
+            self.target.element.text = '%d | 100'%paclhp
 class UpdatePowerRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -349,14 +355,14 @@ class UpdateHealthRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if pacrhp <= 0.0:
-            pass
+            self.target.set_progress(0)
         else:
             self.target.set_progress(pacrhp*0.01)
 class UpdateHealthLeft(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if paclhp <= 0.0:
-            pass
+            self.target.set_progress(0)
         else:
             self.target.set_progress(paclhp*0.01)
 class UpdateCountdown(cocos.actions.Action):
