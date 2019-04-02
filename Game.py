@@ -761,9 +761,9 @@ class MainMenu(Menu):
             self._activate_item()
             return True
         elif symbol in (key.DOWN, key.UP, key.S, key.W, key.I, key.K):
-            if symbol == key.DOWN or symbol == key.S:
+            if symbol == key.DOWN or symbol == key.S or symbol == key.K:
                 new_idx = self.selected_index+1
-            elif symbol == key.UP or symbol == key.W:
+            elif symbol == key.UP or symbol == key.W or symbol == key.I:
                 new_idx = self.selected_index-1
             if new_idx < 0:
                 new_idx = len(self.children)-1
