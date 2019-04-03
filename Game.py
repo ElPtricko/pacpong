@@ -188,10 +188,10 @@ class HealthBar(cocos.layer.ColorLayer):
     def __init__(self):
         w, h = director.director.get_window_size()
         super(HealthBar, self).__init__(100, 100, 200, 0, width=w-int(6*(w/1440)), height=int(40*(h/900)))
-        self.position = (3*(w/1440), h-43*(h/900))
-        self.progressbar = ProgressBar(self.width//2-2, 40)
+        self.position = (3*(w/1440), h-int(43*(h/900)))
+        self.progressbar = ProgressBar(self.width//2-2, int(40*(h/900)))
         self.progressbar.position = 0, 0
-        self.progressbar2 = ProgressBar(self.width//2-2, 40)
+        self.progressbar2 = ProgressBar(self.width//2-2, int(40*(h/900)))
         self.progressbar2.position = self.width-self.progressbar2.width, 0
         label = cocos.text.Label("HEALTH", position=(self.progressbar.position[0]+
                                                      self.progressbar.width-20*(w/1440),
@@ -229,10 +229,10 @@ class PowerBar(cocos.layer.ColorLayer):
     def __init__(self):
         w, h = director.director.get_window_size()
         super(PowerBar, self).__init__(100, 100, 200, 0, width=w-int(6*(w/1440)), height=int(40*(h/900)))
-        self.position = (3*(w/1440), h-86*(h/900))
-        self.progressbar = ProgressPowerBar(self.width//2-2, 40)
+        self.position = (3*(w/1440), h-int(86*(h/900)))
+        self.progressbar = ProgressPowerBar(self.width//2-2, int(40*(h/900)))
         self.progressbar.position = 0, 0
-        self.progressbar2 = ProgressPowerBar(self.width//2-2, 40)
+        self.progressbar2 = ProgressPowerBar(self.width//2-2, int(40*(h/900)))
         self.progressbar2.position = self.width-self.progressbar2.width, 0
         label = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
                                                     self.progressbar.width-20*(w/1440),
