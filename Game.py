@@ -791,7 +791,7 @@ class MainMenu(Menu):
         self.items[0].y = 30
         self.items[1].y = 20
         self.items[2].y = 10
-        self.create_menu(self.items, shake(), shake_back())
+        self.create_menu(self.items, shake())
 
     @staticmethod
     def quit():
