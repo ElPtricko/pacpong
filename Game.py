@@ -20,7 +20,7 @@ class GameScene(cocos.layer.ColorLayer):
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.pointsr = cocos.text.Label('POINTS: 0', ((windowX-120*(windowX/1440)),
-                                                                    50*(windowY/900)),
+                                                      50*(windowY/900)),
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         if practice:
@@ -812,7 +812,7 @@ class MainMenu(Menu):
                 new_idx = 0
             self._select_item(new_idx)
             return True
-        elif symbol in (key.Q, key.PERIOD, key.Z, key.O):
+        elif symbol in (key.Q, key.PERIOD, key.Z, key.O, key.W, key.S, key.A, key.D, key.J, key.K, key.L, key.I):
             return True
 
 
