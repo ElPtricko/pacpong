@@ -3,7 +3,6 @@ from cocos import director
 from cocos.menu import *
 from cocos.scene import Scene
 from cocos.scenes import *
-from pyglet.window import key
 from progressBar import *
 from sprites import *
 
@@ -17,14 +16,14 @@ class GameScene(cocos.layer.ColorLayer):
         paclhp = 100.0
         pacrhp = 100.0
         background = Bg('bg1.png')
-        self.pointsl = cocos.text.Label('POINTS: '+str(left_points), ((120*(windowX/1440)), 50*(windowY/900)),
+        self.pointsl = cocos.text.Label('POINTS: 0', ((120*(windowX/1440)), 50*(windowY/900)),
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        self.pointsr = cocos.text.Label('POINTS: '+str(right_points), ((windowX-120*(windowX/1440)),
-                                                                       50*(windowY/900)),
+        self.pointsr = cocos.text.Label('POINTS: 0', ((windowX-120*(windowX/1440)),
+                                                                    50*(windowY/900)),
                                         font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        if practice is True:
+        if practice:
             left_points = 0
             right_points = -1
             powerleft = 5.0
@@ -48,7 +47,6 @@ class GameScene(cocos.layer.ColorLayer):
                             MoveBy((0, 70*(windowY/900)), 0.63)+
                             MoveBy((0, -70*(windowY/900)), 0.3)+
                             MoveBy((135*(windowX/1440), 0), 0.3))
-
         self.paddleLeft = Paddle('left')
         self.paddleRight = Paddle('right')
         self.GhostBall = GhostBall(practice)
@@ -88,46 +86,16 @@ class GameScene(cocos.layer.ColorLayer):
         self.GhostBall.do(MoveBall())
         self.pacright.do(MovePacr())
         if timer is True:
-            global time
-            self.countdownlabel = cocos.text.Label('%d S' % 4, (windowX/2, windowY*9.5/11),
+            self.countdownlabel = cocos.text.Label('%d S'%4, (windowX/2, windowY*9.5/11),
                                                    font_size=16*((windowX+windowY)/(1440+900)), font_name=FN,
                                                    color=(0, 0, 0, 255), anchor_x='center')
             self.countdownlabel.do(UpdateCountdown())
             self.add(self.countdownlabel)
-            time = 1800
         else:
             pass
 
-    def practice_mode(self, dt):
-        global powerright, powerleft, paclhp, pacrhp
-        if paclhp < 100:
-            if paclhp < 50:
-                paclhp += 20
-            paclhp += 1
-        if pacrhp < 100:
-            if pacrhp < 50:
-                pacrhp += 20
-            pacrhp += 1
-        if powerright < 100:
-            powerright += 4
-        if powerleft < 100:
-            powerleft += 4
-
-    def countdown(self, dt):
-        global time
-        if -5 < time <= 0:
-            if paclhp*left_points == pacrhp*right_points:
-                director.director.push(FadeTransition(on_game_end('TIE'), 2))
-            elif paclhp*left_points < pacrhp*right_points:
-                director.director.push(FadeTransition(on_game_end('RIGHT'), 2))
-            else:
-                director.director.push(FadeTransition(on_game_end('LEFT'), 2))
-            time = -6
-        else:
-            time -= 1
-
     def updateobj(self, dt):
-        global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft, paclhp, pacrhp
+        global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft, paclhp, pacrhp, time
         self.GhostBall.position = ballpos
         self.paddleLeft.position = pl
         self.paddleRight.position = pr
@@ -154,6 +122,14 @@ class GameScene(cocos.layer.ColorLayer):
         elif -50 < pacrhp <= 0 < paclhp:
             pacrhp = -60
             director.director.push(FadeTransition(on_game_end('LEFT'), 2))
+        if -5 < time <= 0:
+            if paclhp*left_points == pacrhp*right_points:
+                director.director.push(FadeTransition(on_game_end('TIE'), 2))
+            elif paclhp*left_points < pacrhp*right_points:
+                director.director.push(FadeTransition(on_game_end('RIGHT'), 2))
+            else:
+                director.director.push(FadeTransition(on_game_end('LEFT'), 2))
+            time = -6
 
     def on_key_press(self, symbol, mod):
         global powerright, powerleft, paclhp, pacrhp
@@ -188,16 +164,16 @@ class GameScene(cocos.layer.ColorLayer):
             self.pacright.do(NoMove())
             self.pacright.do(Delay(0.8)+MoveNormal())
         if powerleft > 50 and symbol == key.F:
-            self.speed.do(MoveTo((windowX/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0)+
-                          Delay(4)+MoveTo((-1000, -1000), 0))
+            self.speed.do(MoveTo((windowX/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0)
+                          +Delay(4)+MoveTo((-1000, -1000), 0))
             self.pacright.do(InvertControls())
             self.pacright.do(Delay(4)+NoInvert())
             self.paddleRight.do(InvertControls())
             self.paddleRight.do(Delay(4)+NoInvert())
             powerleft -= 50
         if powerright > 50 and symbol == key.H:
-            self.speed2.do(MoveTo((windowX/2-self.speed2.width/2, windowY/2), 0)+Delay(4)+
-                           MoveTo((-1000, -1000), 0))
+            self.speed2.do(MoveTo((windowX/2-self.speed2.width/2-50*((windowX+windowY)/(1440+900)), windowY/2), 0)
+                           +Delay(4)+MoveTo((-1000, -1000), 0))
             self.pacleft.do(InvertControls())
             self.pacleft.do(Delay(4)+NoInvert())
             self.paddleLeft.do(InvertControls())
@@ -211,31 +187,30 @@ class GameScene(cocos.layer.ColorLayer):
 class HealthBar(cocos.layer.ColorLayer):
     def __init__(self):
         w, h = director.director.get_window_size()
-        super(HealthBar, self).__init__(100, 100, 200, 0, width=w-6, height=40)
-        self.position = (3, h-43)
+        super(HealthBar, self).__init__(100, 100, 200, 0, width=w-int(6*(w/1440)), height=int(40*(h/900)))
+        self.position = (3*(w/1440), h-43*(h/900))
         self.progressbar = ProgressBar(self.width//2-2, 40)
         self.progressbar.position = 0, 0
         self.progressbar2 = ProgressBar(self.width//2-2, 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
-
         label = cocos.text.Label("HEALTH", position=(self.progressbar.position[0]+
-                                                     self.progressbar.width-20*(windowX/1440),
+                                                     self.progressbar.width-20*(w/1440),
                                                      self.progressbar.position[1]+self.progressbar.height/2),
-                                 color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                 color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                  anchor_x='right', anchor_y='center')
         label2 = cocos.text.Label("HEALTH", position=(self.progressbar.position[0]+
-                                                      self.progressbar2.width+20*(windowX/1440),
+                                                      self.progressbar2.width+20*(w/1440),
                                                       self.progressbar2.position[1]+self.progressbar2.height/2),
-                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
-        health = cocos.text.Label("100 | 100", position=(self.progressbar.position[0]+20*(windowX/1440),
+        health = cocos.text.Label("100 | 100", position=(self.progressbar.position[0]+20*(w/1440),
                                                          self.progressbar.position[1]+self.progressbar.height/2),
-                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
         health2 = cocos.text.Label("100 | 100", position=(self.progressbar2.position[0]+self.progressbar2.width-
-                                                          20*(windowX/1440),
+                                                          20*(w/1440),
                                                           self.progressbar2.position[1]+self.progressbar2.height/2),
-                                   color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                   color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                    anchor_x='right', anchor_y='center')
 
         self.add(self.progressbar)
@@ -251,35 +226,32 @@ class HealthBar(cocos.layer.ColorLayer):
 
 
 class PowerBar(cocos.layer.ColorLayer):
-    is_event_handler = True
-
     def __init__(self):
         w, h = director.director.get_window_size()
-        super(PowerBar, self).__init__(100, 100, 200, 0, width=w-6, height=40)
-        self.position = (3, h-87)
+        super(PowerBar, self).__init__(100, 100, 200, 0, width=w-int(6*(w/1440)), height=int(40*(h/900)))
+        self.position = (3*(w/1440), h-86*(h/900))
         self.progressbar = ProgressPowerBar(self.width//2-2, 40)
         self.progressbar.position = 0, 0
         self.progressbar2 = ProgressPowerBar(self.width//2-2, 40)
         self.progressbar2.position = self.width-self.progressbar2.width, 0
         label = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
-                                                    self.progressbar.width-20*(windowX/1440),
+                                                    self.progressbar.width-20*(w/1440),
                                                     self.progressbar.position[1]+self.progressbar.height/2),
-                                 color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                 color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                  anchor_x='right', anchor_y='center')
         label2 = cocos.text.Label("POWER", position=(self.progressbar.position[0]+
-                                                     self.progressbar2.width+20*(windowX/1440),
+                                                     self.progressbar2.width+20*(w/1440),
                                                      self.progressbar2.position[1]+self.progressbar2.height/2),
-                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
-        power = cocos.text.Label("0 | 100",
-                                 position=(self.progressbar.position[0]+20*(windowX/1440),
-                                           self.progressbar.position[1]+self.progressbar.height/2),
-                                 color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+        power = cocos.text.Label("0 | 100", position=(self.progressbar.position[0]+20*(w/1440),
+                                                      self.progressbar.position[1]+self.progressbar.height/2),
+                                 color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                  anchor_x='left', anchor_y='center')
-        power2 = cocos.text.Label("0 | 100",
-                                  position=(self.progressbar2.position[0]+self.progressbar2.width-20*(windowX/1440),
-                                            self.progressbar2.position[1]+self.progressbar2.height/2),
-                                  color=(0, 0, 0, 255), font_size=10*((windowX+windowY)/(1440+900)), font_name=FN,
+        power2 = cocos.text.Label("0 | 100", position=(self.progressbar2.position[0]+self.progressbar2.width-
+                                                       20*(w/1440),
+                                                       self.progressbar2.position[1]+self.progressbar2.height/2),
+                                  color=(0, 0, 0, 255), font_size=10*((w+h)/(1440+900)), font_name=FN,
                                   anchor_x='right', anchor_y='center')
         self.add(self.progressbar)
         self.add(self.progressbar2)
@@ -292,43 +264,44 @@ class PowerBar(cocos.layer.ColorLayer):
         power.do(UpdatePowerTL())
         power2.do(UpdatePowerTR())
 
-    def update_bar(self, dt):
-        global powerright, powerleft
-        if 0 <= powerright < 100:
-            powerright += 0.05
-        elif powerright >= 100:
-            powerright = 100
-        if 0 <= powerleft < 100:
-            powerleft += 0.05
-        elif powerleft >= 100:
-            powerleft = 100
-
 
 # ACTIONS #
 class NoMove(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.stop = True
+
+
 class MoveNormal(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.stop = False
+
+
 class NoInvert(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.invert = False
+
+
 class InvertControls(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.invert = True
+
+
 class UpdatePowerTR(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.element.text = '%d | 100'%powerright
+
+
 class UpdatePowerTL(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.element.text = '%d | 100'%powerleft
+
+
 class UpdateHealthTR(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -336,6 +309,8 @@ class UpdateHealthTR(cocos.actions.Action):
             self.target.element.text = '0 | 100'
         else:
             self.target.element.text = '%d | 100'%pacrhp
+
+
 class UpdateHealthTL(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -343,14 +318,20 @@ class UpdateHealthTL(cocos.actions.Action):
             self.target.element.text = '0 | 100'
         else:
             self.target.element.text = '%d | 100'%paclhp
+
+
 class UpdatePowerRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.set_progress(powerright*0.01)
+
+
 class UpdatePowerLeft(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         self.target.set_progress(powerleft*0.01)
+
+
 class UpdateHealthRight(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -358,6 +339,8 @@ class UpdateHealthRight(cocos.actions.Action):
             self.target.set_progress(0)
         else:
             self.target.set_progress(pacrhp*0.01)
+
+
 class UpdateHealthLeft(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
@@ -365,13 +348,15 @@ class UpdateHealthLeft(cocos.actions.Action):
             self.target.set_progress(0)
         else:
             self.target.set_progress(paclhp*0.01)
+
+
 class UpdateCountdown(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         if time < 0:
             pass
         else:
-            self.target.element.text = '%.1f S' % (time*0.1)
+            self.target.element.text = '%.1f S'%(time*0.1)
 
 
 class PointslAction(cocos.actions.Action):
@@ -566,16 +551,18 @@ class MovePacl(cocos.actions.Move):
                     elif self.target.x >= windowX/2-(70*windowX/1440):
                         self.target.x = windowX/2-(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
                 elif keyboard[key.S]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x >= windowX/2-(70*windowX/1440):
                         self.target.x = windowX/2-(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
             if keyboard[key.A] and not keyboard[key.D]:
                 if self.target.x <= 200*(windowX/1440):
                     self.target.x = 200*(windowX/1440)
@@ -587,16 +574,18 @@ class MovePacl(cocos.actions.Move):
                     elif self.target.x <= 200*(windowX/1440):
                         self.target.x = 200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
                 elif keyboard[key.S]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x <= 200*(windowX/1440):
                         self.target.x = 200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
         if self.target.invert is True and self.target.stop is False:
             if keyboard[key.S] and not keyboard[key.W]:
                 if self.target.y >= windowY-(200*(windowY/900)):
@@ -619,16 +608,18 @@ class MovePacl(cocos.actions.Move):
                     elif self.target.x >= windowX/2-(70*windowX/1440):
                         self.target.x = windowX/2-(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
                 elif keyboard[key.W]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x >= windowX/2-(70*windowX/1440):
                         self.target.x = windowX/2-(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
             if keyboard[key.D] and not keyboard[key.A]:
                 if self.target.x <= 200*(windowX/1440):
                     self.target.x = 200*(windowX/1440)
@@ -640,16 +631,18 @@ class MovePacl(cocos.actions.Move):
                     elif self.target.x <= 200*(windowX/1440):
                         self.target.x = 200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
                 elif keyboard[key.W]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x <= 200*(windowX/1440):
                         self.target.x = 200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
         else:
             pass
         global pacl
@@ -681,16 +674,18 @@ class MovePacr(cocos.actions.Move):
                     elif self.target.x >= windowX-200*(windowX/1440):
                         self.target.x = windowX-200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
                 elif keyboard[key.K]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x >= windowX-200*(windowX/1440):
                         self.target.x = windowX-200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
             if keyboard[key.J] and not keyboard[key.L]:
                 if self.target.x <= windowX/2+(70*windowX/1440):
                     self.target.x = windowX/2+(70*windowX/1440)
@@ -702,16 +697,18 @@ class MovePacr(cocos.actions.Move):
                     elif self.target.x <= windowX/2+(70*windowX/1440):
                         self.target.x = windowX/2+(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
                 elif keyboard[key.K]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x <= windowX/2+(70*windowX/1440):
                         self.target.x = windowX/2+(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60),
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)), 0))
+                        self.target.do(MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60),
+                                               (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)),
+                                              0))
         if self.target.invert is True and self.target.stop is False:
             if keyboard[key.K] and not keyboard[key.I]:
                 if self.target.y >= windowY-(200*(windowY/900)):
@@ -734,16 +731,18 @@ class MovePacr(cocos.actions.Move):
                     elif self.target.x >= windowX-200*(windowX/1440):
                         self.target.x = windowX-200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
                 elif keyboard[key.I]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x >= windowX-200*(windowX/1440):
                         self.target.x = windowX-200*(windowX/1440)
                     else:
-                        self.target.do(MoveBy((((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy((((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
             if keyboard[key.L] and not keyboard[key.J]:
                 if self.target.x <= windowX/2+(70*windowX/1440):
                     self.target.x = windowX/2+(70*windowX/1440)
@@ -755,16 +754,18 @@ class MovePacr(cocos.actions.Move):
                     elif self.target.x <= windowX/2+(70*windowX/1440):
                         self.target.x = windowX/2+(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               ((((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    ((((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
                 elif keyboard[key.I]:
                     if self.target.y <= (200*(windowY/900)):
                         self.target.y = 200*(windowY/900)
                     elif self.target.x <= windowX/2+(70*windowX/1440):
                         self.target.x = windowX/2+(70*windowX/1440)
                     else:
-                        self.target.do(MoveBy(((-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2,
-                                               (-(((10 ** 2)/2) ** 0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
+                        self.target.do(
+                            MoveBy(((-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2,
+                                    (-(((10**2)/2)**0.5)*(windowY/900))/(displayfrequency/60)*2), 0))
         else:
             pass
         global pacr
@@ -782,9 +783,9 @@ class MainMenu(Menu):
         self.font_item_selected = {'font_name': FN, 'font_size': 25*((windowX+windowY)/(1440+900)),
                                    'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
         self.items = []
-        self.items.append(MenuItem('NORMAL MODE', self.start_game))
-        self.items.append(MenuItem('COUNTDOWN MODE', self.countdown_mode))
-        self.items.append(MenuItem('PRACTICE MODE', self.practice))
+        self.items.append(MenuItem('COUNTDOWN MODE', countdown_mode_start))
+        self.items.append(MenuItem('INFINITE MODE', infinite_mode_start))
+        self.items.append(MenuItem('PRACTICE MODE', practice_mode_start))
         self.items.append(MenuItem('QUIT', self.quit))
         self.selected = 0
         self.items[0].y = 30
@@ -792,26 +793,18 @@ class MainMenu(Menu):
         self.items[2].y = 10
         self.create_menu(self.items, shake(), shake_back())
 
-    def start_game(self):
-        director.director.push(MoveInRTransition(on_game_start(False, False), 1))
-
-    def countdown_mode(self):
-        director.director.push(MoveInTTransition(on_game_start(False, True), 1))
-
-    def practice(self):
-        director.director.push(MoveInLTransition(on_game_start(True, False), 1))
-
-    def quit(self):
+    @staticmethod
+    def quit():
         pyglet.app.exit()
 
     def on_key_press(self, symbol, modifiers):
         if symbol in (key.ENTER, key.NUM_ENTER):
             self._activate_item()
             return True
-        elif symbol in (key.DOWN, key.UP, key.S, key.W, key.I, key.K):
-            if symbol == key.DOWN or symbol == key.S or symbol == key.K:
+        elif symbol in (key.DOWN, key.UP):
+            if symbol == key.DOWN:
                 new_idx = self.selected_index+1
-            elif symbol == key.UP or symbol == key.W or symbol == key.I:
+            elif symbol == key.UP:
                 new_idx = self.selected_index-1
             if new_idx < 0:
                 new_idx = len(self.children)-1
@@ -826,16 +819,23 @@ class MainMenu(Menu):
 class BackgroundLayer(cocos.layer.Layer):
     def __init__(self, winner=None):
         super().__init__()
-        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT', (windowX-(50*windowX/1440), 80*(windowY/900)),
+        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT',
+                                    (windowX-(50*windowX/1440), 80*(windowY/900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right', anchor_y='bottom')
-        credits2 = cocos.text.Label('DESIGNER   -   ADRI EVANS', (windowX-(50*windowX/1440), 40*(windowY/900)),
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right',
+                                    anchor_y='bottom')
+        credits2 = cocos.text.Label('DESIGNER   -   ADRI EVANS',
+                                    (windowX-(50*windowX/1440), 40*(windowY/900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right', anchor_y='bottom')
-        credits3 = cocos.text.Label('BAUTISTA CAZEAUX  -  CONCEPT & MARKETING', ((50*windowX/1440), 80*(windowY/900)),
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='right',
+                                    anchor_y='bottom')
+        credits3 = cocos.text.Label('BAUTISTA CAZEAUX  -  CONCEPT & MARKETING',
+                                    ((50*windowX/1440), 80*(windowY/900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='left', anchor_y='bottom')
-        credits4 = cocos.text.Label('PABLO PAZOS  -  MARKETING', ((50*windowX/1440), 40*(windowY/900)), font_name=FN,
+                                    font_size=11*((windowX+windowY)/(1440+900)), anchor_x='left',
+                                    anchor_y='bottom')
+        credits4 = cocos.text.Label('PABLO PAZOS  -  MARKETING', ((50*windowX/1440), 40*(windowY/900)),
+                                    font_name=FN,
                                     color=(150, 150, 150, 255), font_size=11*((windowX+windowY)/(1440+900)),
                                     anchor_x='left', anchor_y='bottom')
         self.add(Bg('bg1.png'))
@@ -847,45 +847,71 @@ class BackgroundLayer(cocos.layer.Layer):
         if winner is None:
             pass
         elif 'LEFT' in winner:
-            win = cocos.text.Label('WINNER', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(0, 200, 30, 255),
-                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
-            lose = cocos.text.Label('LOSER', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(200, 0, 10, 255),
-                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            win = cocos.text.Label('WINNER', (windowX*1.3/8, windowY*4/6), font_name=FN,
+                                   color=(0, 200, 30, 255),
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX*6.7/8, windowY*4/6), font_name=FN,
+                                    color=(200, 0, 10, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                    anchor_y='center')
             lose.rotation = 20
             win.rotation = -20
             self.add(win)
             self.add(lose)
         elif 'RIGHT' in winner:
-            win = cocos.text.Label('WINNER', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(0, 200, 30, 255),
-                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
-            lose = cocos.text.Label('LOSER', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(200, 0, 10, 255),
-                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+            win = cocos.text.Label('WINNER', (windowX*6.7/8, windowY*4/6), font_name=FN,
+                                   color=(0, 200, 30, 255),
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX*1.3/8, windowY*4/6), font_name=FN,
+                                    color=(200, 0, 10, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                    anchor_y='center')
             lose.rotation = -20
             win.rotation = 20
             self.add(win)
             self.add(lose)
         elif 'TIE' in winner:
             win = cocos.text.Label('TIED', (windowX*1.3/8, windowY*4/6), font_name=FN, color=(200, 200, 0, 255),
-                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
-            lose = cocos.text.Label('TIED', (windowX*6.7/8, windowY*4/6), font_name=FN, color=(200, 200, 0, 255),
-                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center', anchor_y='center')
+                                   font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('TIED', (windowX*6.7/8, windowY*4/6), font_name=FN,
+                                    color=(200, 200, 0, 255),
+                                    font_size=50*((windowX+windowY)/(1440+900)), anchor_x='center',
+                                    anchor_y='center')
             lose.rotation = 20
             win.rotation = -20
             self.add(win)
             self.add(lose)
 
 
-# MAIN DIRECTOR #
-def on_game_start(practice=False, timer=False):
-    thisgamescene = Scene()
-    thisgamescene.add(GameScene(practice, timer), z=-1, name="Game")
-    thisgamescene.schedule_interval(GameScene(practice, timer).updateobj, (1/60)/(displayfrequency/144)*1.55)
-    thisgamescene.schedule_interval(PowerBar().update_bar, 1/20)
-    if practice:
-        thisgamescene.schedule_interval(GameScene(True, False).practice_mode, 1/20)
-    elif timer:
-        thisgamescene.schedule_interval(GameScene(False, True).countdown, 1/10)
-    return thisgamescene
+def practice_mode_start():
+    practice = Scene()
+    practice.add(GameScene(True, False))
+    practice.schedule_interval(GameScene(True, False).updateobj, (1/60)/(displayfrequency/144)*1.55)
+    practice.schedule_interval(update_powerbar, 1/20)
+    practice.schedule_interval(practice_mode, 1/20)
+    director.director.push(MoveInLTransition(practice, 1))
+
+
+def countdown_mode_start():
+    global time
+    time = 1800
+    countdown = Scene()
+    countdown.add(GameScene(False, True))
+    countdown.schedule_interval(GameScene(False, True).updateobj, (1/60)/(displayfrequency/144)*1.55)
+    countdown.schedule_interval(update_powerbar, 1/20)
+    countdown.schedule_interval(countdown_mode, 1/10)
+    director.director.push(MoveInTTransition(countdown, 1))
+
+
+def infinite_mode_start():
+    infinite = Scene()
+    infinite.add(GameScene(False, False))
+    infinite.schedule_interval(GameScene(False, False).updateobj, (1/60)/(displayfrequency/144)*1.55)
+    infinite.schedule_interval(update_powerbar, 1/20)
+    director.director.push(MoveInRTransition(infinite, 1))
 
 
 def on_game_end(winner=None):
@@ -895,26 +921,34 @@ def on_game_end(winner=None):
     return endscene
 
 
-def calculate_seconds(balldx, seconds):
-    ballsmth = 60*balldx*seconds
-    return abs(ballsmth)
+def update_powerbar(dt):
+    global powerright, powerleft
+    if 0 <= powerright < 100:
+        powerright += 0.05
+    elif powerright >= 100:
+        powerright = 100
+    if 0 <= powerleft < 100:
+        powerleft += 0.05
+    elif powerleft >= 100:
+        powerleft = 100
 
 
-class Handlers(object):
-    def on_key_press(symbol, modifiers):
-        if symbol is key.ESCAPE:
-            return True
+def practice_mode(dt):
+    global powerright, powerleft, paclhp, pacrhp
+    if paclhp < 100:
+        if paclhp < 50:
+            paclhp += 20
+        paclhp += 1
+    if pacrhp < 100:
+        if pacrhp < 50:
+            pacrhp += 20
+        pacrhp += 1
+    if powerright < 100:
+        powerright += 4
+    if powerleft < 100:
+        powerleft += 4
 
 
-if __name__ == '__main__':
-    director.director.init(width=windowX, height=windowY, caption="PacPong",
-                           fullscreen=True
-                           )
-    director.director.window.pop_handlers()
-    keyboard = key.KeyStateHandler()
-    director.director.window.push_handlers(keyboard)
-    director.director.window.push_handlers(Handlers)
-    scene = Scene()
-    scene.add(MainMenu(), z=1)
-    scene.add(BackgroundLayer(), z=0)
-    director.director.run(scene)
+def countdown_mode(dt):
+    global time
+    time -= 1

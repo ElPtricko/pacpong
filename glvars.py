@@ -1,7 +1,8 @@
 import platform
 from pyglet import *
+from pyglet.window import key
 
-
+keyboard = key.KeyStateHandler()
 resource.path = ['resources']
 resource.reindex()
 resource.add_font('Splatch.ttf')
@@ -41,3 +42,13 @@ elif platform.system() == 'Darwin':
 
 else:
     raise OSError('Your platform is not supported!')
+
+
+def calculate_seconds(balldx, seconds):
+    ballsmth = 60*balldx*seconds
+    return abs(ballsmth)
+
+
+def on_key_press(symbol, modifiers):
+    if symbol is key.ESCAPE:
+        return True

@@ -19,7 +19,7 @@ class ProgressBar(cocos.cocosnode.CocosNode):
         gl.glPushMatrix()
         self.transform()
         gl.glBegin(gl.GL_QUADS)
-        gl.glColor4ub(*(0, 30, 160, 150))
+        gl.glColor4ub(*(180, 180, 180, 180))
         for v in self.vertexes_out:
             gl.glVertex3i(*v)
         gl.glColor4ub(*(50, 140, 0, 255))
@@ -46,7 +46,7 @@ class ProgressPowerBar(cocos.cocosnode.CocosNode):
         gl.glPushMatrix()
         self.transform()
         gl.glBegin(gl.GL_QUADS)
-        gl.glColor4ub(*(0, 30, 160, 150))
+        gl.glColor4ub(*(180, 180, 180, 180))
         for v in self.vertexes_out:
             gl.glVertex3i(*v)
         gl.glColor4ub(*(120, 0, 200, 255))
