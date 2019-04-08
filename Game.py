@@ -133,7 +133,7 @@ class GameScene(cocos.layer.ColorLayer):
 
     def on_key_press(self, symbol, mod):
         global powerright, powerleft, paclhp, pacrhp
-        if powerleft > 20 and symbol == key.C:
+        if powerleft >= 20 and symbol == key.C:
             powerleft -= 20
             pacrhp -= 10
             self.fireball2.position = pacl
@@ -141,7 +141,7 @@ class GameScene(cocos.layer.ColorLayer):
                               MoveTo((-100, -100), 0))
             self.pacright.do(NoMove())
             self.pacright.do(Delay(0.3)+MoveNormal())
-        if powerright > 20 and symbol == key.M:
+        if powerright >= 20 and symbol == key.M:
             powerright -= 20
             paclhp -= 10
             self.fireball.position = pacr
@@ -149,31 +149,31 @@ class GameScene(cocos.layer.ColorLayer):
                              MoveTo((-100, -100), 0))
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.3)+MoveNormal())
-        if powerleft > 35 and symbol == key.V:
+        if powerleft >= 35 and symbol == key.V:
             paclhp += 20
             powerleft -= 35
             self.heal.do(MoveTo(pacl, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
-                         +ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
+                         + ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacleft.do(NoMove())
             self.pacleft.do(Delay(0.8)+MoveNormal())
-        if powerright > 35 and symbol == key.N:
+        if powerright >= 35 and symbol == key.N:
             pacrhp += 20
             powerright -= 35
             self.heal2.do(MoveTo(pacr, 0)+ScaleTo(1.7, 0.2)+ScaleTo(1.2, 0.2)+ScaleTo(1.7, 0.2)
-                          +ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
+                          + ScaleTo(1.2, 0.2)+MoveTo((-100, -100), 0))
             self.pacright.do(NoMove())
             self.pacright.do(Delay(0.8)+MoveNormal())
-        if powerleft > 50 and symbol == key.F:
+        if powerleft >= 50 and symbol == key.F:
             self.speed.do(MoveTo((windowX/2+self.speed.width/2+50*((windowX+windowY)/(1440+900)), windowY/2), 0)
-                          +Delay(4)+MoveTo((-1000, -1000), 0))
+                          + Delay(4)+MoveTo((-1000, -1000), 0))
             self.pacright.do(InvertControls())
             self.pacright.do(Delay(4)+NoInvert())
             self.paddleRight.do(InvertControls())
             self.paddleRight.do(Delay(4)+NoInvert())
             powerleft -= 50
-        if powerright > 50 and symbol == key.H:
+        if powerright >= 50 and symbol == key.H:
             self.speed2.do(MoveTo((windowX/2-self.speed2.width/2-50*((windowX+windowY)/(1440+900)), windowY/2), 0)
-                           +Delay(4)+MoveTo((-1000, -1000), 0))
+                           + Delay(4)+MoveTo((-1000, -1000), 0))
             self.pacleft.do(InvertControls())
             self.pacleft.do(Delay(4)+NoInvert())
             self.paddleLeft.do(InvertControls())
@@ -447,24 +447,24 @@ class MoveBall(cocos.actions.Move):
         if paccollisionl:
             paclhp -= 25
             if self.target.dx < 0:
-                self.target.x -= 50*(windowX/1440)
+                self.target.x -= (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dx > 0:
-                self.target.x += 50*(windowX/1440)
+                self.target.x += (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dy < 0:
-                self.target.y -= 50*(windowY/900)
+                self.target.y -= (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dy > 0:
-                self.target.y += 50*(windowY/900)
+                self.target.y += (14 * (windowY/900)) / (displayfrequency/60)
             paccollisionl = False
         if paccollisionr:
             pacrhp -= 25
             if self.target.dx < 0:
-                self.target.x -= 50*(windowX/1440)
+                self.target.x -= (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dx > 0:
-                self.target.x += 50*(windowX/1440)
+                self.target.x += (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dy < 0:
-                self.target.y -= 50*(windowY/900)
+                self.target.y -= (14 * (windowY/900)) / (displayfrequency/60)
             if self.target.dy > 0:
-                self.target.y += 50*(windowY/900)
+                self.target.y += (14 * (windowY/900)) / (displayfrequency/60)
             paccollisionr = False
 
 

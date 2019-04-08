@@ -15,7 +15,8 @@ class Paddle(cocos.sprite.Sprite):
             self.position = 80 * (windowX / 1440), (windowY / 2)
         if side == 'right':
             self.position = windowX - 80 * (windowX / 1440), (windowY / 2)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), self.width/2, self.height/2)
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14.3 * (windowY/900)) / (displayfrequency/60),
+                                     self.height/2)
 
 
 class GhostBall(cocos.sprite.Sprite):
@@ -49,7 +50,8 @@ class PacBall(cocos.sprite.Sprite):
         if side is 'right':
             self.image = pyglet.resource.image('pacball.png', flip_x=True)
             self.position = ((windowX/4)*3, windowY/2 + self.width/3)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), abs(self.width)/2)
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowY/900)) / (displayfrequency/60),
+                                     abs(self.height*2/3))
         self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
 
 
