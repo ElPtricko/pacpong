@@ -30,29 +30,31 @@ class GhostBall(cocos.sprite.Sprite):
             self.position = (500*(windowX/1440)), (windowY/2)
         else:
             self.dx = (14.4 * (windowX/1440)) / (displayfrequency/60)
-            self.position = (windowX-500*(windowX/1440)), (windowY/2)
+            self.position = (windowX-50*(windowX/1440)), (windowY/2)
         self.dy = (14.4 * (windowY/900)) / (displayfrequency/60)
         self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width/2)
         self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
 
 
 class PacBall(cocos.sprite.Sprite):
-    def __init__(self, color, side):
-        super().__init__('pacball.png')
+    def __init__(self, side):
+        super().__init__('pacballblue.gif')
         self.velocity = (0, 0)
-        self.scale_x = self.scale_y = 0.5 * (windowX/1440)
-        self.color = color
+        self.scale_x = self.scale_y = 0.2 * (windowX/1440)
         self.invert = False
         self.stop = False
         if side is 'left':
-            self.image = pyglet.resource.image('pacball.png')
-            self.position = (windowX/4), (windowY/2) + self.width/3
+            self.image = pyglet.resource.animation('pacballred.gif', flip_x=True)
+            self.position = (windowX/4), (windowY/2) + self.width/4
+            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14*(windowY/900))/(displayfrequency/60),
+                                         abs(self.height*2/3))
+            self.anchor = -self.width*2/7, self.height*3/18
         if side is 'right':
-            self.image = pyglet.resource.image('pacball.png', flip_x=True)
-            self.position = ((windowX/4)*3, windowY/2 + self.width/3)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowY/900)) / (displayfrequency/60),
-                                     abs(self.height*2/3))
-        self.do(Repeat(RotateBy(15, 0.1) + RotateBy(-30, 0.2) + RotateBy(15, 0.1)))
+            self.image = pyglet.resource.animation('pacballblue.gif')
+            self.position = ((windowX/4)*3, windowY/2 + self.width/4)
+            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14*(windowY/900))/(displayfrequency/60),
+                                         abs(self.height*2/3))
+            self.anchor = self.width*2/7, self.height*3/18
 
 
 class FireBall(cocos.sprite.Sprite):
