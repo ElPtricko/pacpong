@@ -37,10 +37,10 @@ class GhostBall(cocos.sprite.Sprite):
 
 
 class PacBall(cocos.sprite.Sprite):
-    def __init__(self, side):
+    def __init__(self, side, scale=0.2):
         super().__init__('pacballblue.gif')
         self.velocity = (0, 0)
-        self.scale_x = self.scale_y = 0.2 * (windowX/1440)
+        self.scale_x = self.scale_y = scale * (windowX/1440)
         self.invert = False
         self.stop = False
         if side is 'left':
@@ -94,3 +94,75 @@ class PowersIndicator(cocos.sprite.Sprite):
         self.scale_x = 0.32
         self.scale_y = 0.35
         self.position = (windowX/2, self.height/2 + 20)
+
+
+class BackgroundLayer(cocos.layer.Layer):
+    def __init__(self, winner=None):
+        super().__init__()
+        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT',
+                                    (windowX - (50 * windowX / 1440), 80 * (windowY / 900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
+                                    anchor_y='bottom')
+        credits2 = cocos.text.Label('DESIGNER & ANIMATOR  -   ADRI EVANS',
+                                    (windowX - (50 * windowX / 1440), 40 * (windowY / 900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
+                                    anchor_y='bottom')
+        credits3 = cocos.text.Label('BAUTISTA CAZEAUX  -  CONCEPT & MARKETING',
+                                    ((50 * windowX / 1440), 40 * (windowY / 900)),
+                                    font_name=FN, color=(150, 150, 150, 255),
+                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='left',
+                                    anchor_y='bottom')
+        credits4 = cocos.text.Label('PABLO PAZOS  -  MARKETING', ((50 * windowX / 1440), 80 * (windowY / 900)),
+                                    font_name=FN,
+                                    color=(150, 150, 150, 255), font_size=11 * ((windowX + windowY) / (1440 + 900)),
+                                    anchor_x='left', anchor_y='bottom')
+        self.add(Bg('bg1.png'))
+        self.add(PacBall('left', 0.3))
+        self.add(PacBall('right', 0.3))
+        self.add(cocos.layer.ColorLayer(0, 0, 0, 150, windowX, windowY))
+        self.add(credits1)
+        self.add(credits2)
+        self.add(credits3)
+        self.add(credits4)
+        if winner is None:
+            pass
+        elif 'LEFT' in winner:
+            win = cocos.text.Label('WINNER', (windowX * 1.3 / 8, windowY * 4 / 6), font_name=FN,
+                                   color=(0, 200, 30, 255),
+                                   font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX * 6.7 / 8, windowY * 4 / 6), font_name=FN,
+                                    color=(200, 0, 10, 255),
+                                    font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                    anchor_y='center')
+            lose.rotation = 20
+            win.rotation = -20
+            self.add(win)
+            self.add(lose)
+        elif 'RIGHT' in winner:
+            win = cocos.text.Label('WINNER', (windowX * 6.7 / 8, windowY * 4 / 6), font_name=FN,
+                                   color=(0, 200, 30, 255),
+                                   font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('LOSER', (windowX * 1.3 / 8, windowY * 4 / 6), font_name=FN,
+                                    color=(200, 0, 10, 255),
+                                    font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                    anchor_y='center')
+            lose.rotation = -20
+            win.rotation = 20
+            self.add(win)
+            self.add(lose)
+        elif 'TIE' in winner:
+            win = cocos.text.Label('TIED', (windowX * 1.3 / 8, windowY * 4 / 6), font_name=FN, color=(200, 200, 0, 255),
+                                   font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                   anchor_y='center')
+            lose = cocos.text.Label('TIED', (windowX * 6.7 / 8, windowY * 4 / 6), font_name=FN,
+                                    color=(200, 200, 0, 255),
+                                    font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                    anchor_y='center')
+            lose.rotation = 20
+            win.rotation = -20
+            self.add(win)
+            self.add(lose)
