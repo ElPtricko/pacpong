@@ -17,11 +17,11 @@ class GameScene(cocos.layer.ColorLayer):
         pacrhp = 100.0
         background = Bg('bg1.png')
         self.pointsl = cocos.text.Label('POINTS: 0', ((120 * (windowX / 1440)), 50 * (windowY / 900)),
-                                        font_size=16 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
+                                        font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         self.pointsr = cocos.text.Label('POINTS: 0', ((windowX - 120 * (windowX / 1440)),
                                                       50 * (windowY / 900)),
-                                        font_size=16 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
+                                        font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
                                         color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
         if practice:
             left_points = 0
@@ -87,7 +87,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.pacright.do(MovePacr())
         if timer is True:
             self.countdownlabel = cocos.text.Label('%d S' % 4, (windowX / 2, windowY * 9.5 / 11),
-                                                   font_size=16 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
+                                                   font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
                                                    color=(0, 0, 0, 255), anchor_x='center')
             self.countdownlabel.do(UpdateCountdown())
             self.add(self.countdownlabel)
@@ -198,21 +198,21 @@ class HealthBar(cocos.layer.ColorLayer):
         label = cocos.text.Label("HEALTH", position=(self.progressbar.position[0] +
                                                      self.progressbar.width - 20 * (w / 1440),
                                                      self.progressbar.position[1] + self.progressbar.height / 2),
-                                 color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                 color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                  anchor_x='right', anchor_y='center')
         label2 = cocos.text.Label("HEALTH", position=(self.progressbar.position[0] +
                                                       self.progressbar2.width + 20 * (w / 1440),
                                                       self.progressbar2.position[1] + self.progressbar2.height / 2),
-                                  color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
         health = cocos.text.Label("100 | 100", position=(self.progressbar.position[0] + 20 * (w / 1440),
                                                          self.progressbar.position[1] + self.progressbar.height / 2),
-                                  color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
         health2 = cocos.text.Label("100 | 100", position=(self.progressbar2.position[0] + self.progressbar2.width -
                                                           20 * (w / 1440),
                                                           self.progressbar2.position[1] + self.progressbar2.height / 2),
-                                   color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                   color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                    anchor_x='right', anchor_y='center')
         self.add(self.progressbar)
         self.add(self.progressbar2)
@@ -238,21 +238,21 @@ class PowerBar(cocos.layer.ColorLayer):
         label = cocos.text.Label("POWER", position=(self.progressbar.position[0] +
                                                     self.progressbar.width - 20 * (w / 1440),
                                                     self.progressbar.position[1] + self.progressbar.height / 2),
-                                 color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                 color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                  anchor_x='right', anchor_y='center')
         label2 = cocos.text.Label("POWER", position=(self.progressbar.position[0] +
                                                      self.progressbar2.width + 20 * (w / 1440),
                                                      self.progressbar2.position[1] + self.progressbar2.height / 2),
-                                  color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                   anchor_x='left', anchor_y='center')
         power = cocos.text.Label("0 | 100", position=(self.progressbar.position[0] + 20 * (w / 1440),
                                                       self.progressbar.position[1] + self.progressbar.height / 2),
-                                 color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                 color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                  anchor_x='left', anchor_y='center')
         power2 = cocos.text.Label("0 | 100", position=(self.progressbar2.position[0] + self.progressbar2.width -
                                                        20 * (w / 1440),
                                                        self.progressbar2.position[1] + self.progressbar2.height / 2),
-                                  color=(0, 0, 0, 255), font_size=10 * ((w + h) / (1440 + 900)), font_name=FN,
+                                  color=(0, 0, 0, 255), font_size=20 * ((w + h) / (1440 + 900)), font_name=FN,
                                   anchor_x='right', anchor_y='center')
         self.add(self.progressbar)
         self.add(self.progressbar2)
@@ -364,32 +364,32 @@ class PointslAction(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         global addedpointL
-        self.target.element.text = 'POINTS: %d' % left_points
+        self.target.element.text = 'Points: %d' % left_points
         if addedpointL:
             addedpointL = False
             self.target.do((RotateBy(10, 0.04) + RotateBy(-20, 0.08) +
                             RotateBy(10, 0.04)) * 7)
             self.target.do(ScaleBy(1.7, 0.5) + ScaleTo(1, 0.5))
-            self.target.do(MoveBy((135 * (windowX / 1440), 0), 0.3) +
+            self.target.do(MoveBy((105 * (windowX / 1440), 0), 0.3) +
                            MoveBy((0, 70 * (windowY / 900)), 0.3) +
                            MoveBy((0, -70 * (windowY / 900)), 0.3) +
-                           MoveBy((-135 * (windowX / 1440), 0), 0.3))
+                           MoveBy((-105 * (windowX / 1440), 0), 0.3))
 
 
 class PointsrAction(cocos.actions.Action):
     def step(self, dt):
         super().step(dt)
         global addedpointR
-        self.target.element.text = 'POINTS: %d' % right_points
+        self.target.element.text = 'Points: %d' % right_points
         if addedpointR:
             addedpointR = False
             self.target.do((RotateBy(10, 0.04) + RotateBy(-20, 0.08) +
                             RotateBy(10, 0.04)) * 7)
             self.target.do(ScaleBy(1.7, 0.5) + ScaleTo(1, 0.5))
-            self.target.do(MoveBy((-135 * (windowX / 1440), 0), 0.3) +
+            self.target.do(MoveBy((-105 * (windowX / 1440), 0), 0.3) +
                            MoveBy((0, 70 * (windowY / 900)), 0.3) +
                            MoveBy((0, -70 * (windowY / 900)), 0.3) +
-                           MoveBy((135 * (windowX / 1440), 0), 0.3))
+                           MoveBy((105 * (windowX / 1440), 0), 0.3))
 
 
 class MoveBall(cocos.actions.Move):
@@ -777,22 +777,22 @@ class MovePacr(cocos.actions.Move):
 class MainMenu(Menu):
     def __init__(self):
         super().__init__("PACPONG")
-        self.font_title = {'font_name': FN, 'font_size': 30 * ((windowX + windowY) / (1440 + 900)),
+        self.font_title = {'font_name': FN, 'font_size': 50 * ((windowX + windowY) / (1440 + 900)),
                            'color': (192, 192, 192, 255), 'anchor_y': 'center', 'anchor_x': 'center'}
-        self.font_item = {'font_name': FN, 'font_size': 20 * ((windowX + windowY) / (1440 + 900)),
+        self.font_item = {'font_name': FN, 'font_size': 30 * ((windowX + windowY) / (1440 + 900)),
                           'anchor_y': 'center', 'anchor_x': 'center', 'color': (192, 192, 192, 255)}
-        self.font_item_selected = {'font_name': FN, 'font_size': 25 * ((windowX + windowY) / (1440 + 900)),
+        self.font_item_selected = {'font_name': FN, 'font_size': 35 * ((windowX + windowY) / (1440 + 900)),
                                    'anchor_y': 'center', 'anchor_x': 'center', 'color': (255, 255, 255, 255)}
         self.items = []
-        self.items.append(MenuItem('COUNTDOWN MODE', countdown_mode_start))
-        self.items.append(MenuItem('INFINITE MODE', infinite_mode_start))
-        self.items.append(MenuItem('PRACTICE MODE', practice_mode_start))
-        self.items.append(MenuItem('QUIT', self.quit))
+        self.items.append(MenuItem('Countdown Mode', countdown_mode_start))
+        self.items.append(MenuItem('Infinite Mode', infinite_mode_start))
+        self.items.append(MenuItem('Practice Mode', practice_mode_start))
+        self.items.append(MenuItem('Quit', self.quit))
         self.selected = 0
         self.items[0].y = 30
         self.items[1].y = 20
         self.items[2].y = 10
-        self.create_menu(self.items, shake())
+        self.create_menu(self.items, shake(), shake_back())
 
     @staticmethod
     def quit():

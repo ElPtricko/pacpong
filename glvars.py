@@ -5,8 +5,8 @@ from pyglet.window import key
 keyboard = key.KeyStateHandler()
 resource.path = ['resources']
 resource.reindex()
-resource.add_font('Splatch.ttf')
-FN = 'Splatch'
+resource.add_font('pixelated.ttf')
+FN = 'Pixelated'
 ballpos = (5, 0)
 pl = (500, 500)
 pr = (1000, 1000)

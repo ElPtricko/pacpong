@@ -99,24 +99,24 @@ class PowersIndicator(cocos.sprite.Sprite):
 class BackgroundLayer(cocos.layer.Layer):
     def __init__(self, winner=None):
         super().__init__()
-        credits1 = cocos.text.Label('CREATOR   -   PATRICK RAVNHOLT',
+        credits1 = cocos.text.Label('Developer   -   Patrick Ravnholt',
                                     (windowX - (50 * windowX / 1440), 80 * (windowY / 900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
+                                    font_size=21 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
                                     anchor_y='bottom')
-        credits2 = cocos.text.Label('DESIGNER & ANIMATOR  -   ADRI EVANS',
+        credits2 = cocos.text.Label('Designer & Animator  -   Adri Evans',
                                     (windowX - (50 * windowX / 1440), 40 * (windowY / 900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
+                                    font_size=21 * ((windowX + windowY) / (1440 + 900)), anchor_x='right',
                                     anchor_y='bottom')
-        credits3 = cocos.text.Label('BAUTISTA CAZEAUX  -  CONCEPT & MARKETING',
+        credits3 = cocos.text.Label('Bautista Cazeaux  -  Concept & Marketing',
                                     ((50 * windowX / 1440), 40 * (windowY / 900)),
                                     font_name=FN, color=(150, 150, 150, 255),
-                                    font_size=11 * ((windowX + windowY) / (1440 + 900)), anchor_x='left',
+                                    font_size=21 * ((windowX + windowY) / (1440 + 900)), anchor_x='left',
                                     anchor_y='bottom')
-        credits4 = cocos.text.Label('PABLO PAZOS  -  MARKETING', ((50 * windowX / 1440), 80 * (windowY / 900)),
+        credits4 = cocos.text.Label('Pablo Pazos  -  Marketing', ((50 * windowX / 1440), 80 * (windowY / 900)),
                                     font_name=FN,
-                                    color=(150, 150, 150, 255), font_size=11 * ((windowX + windowY) / (1440 + 900)),
+                                    color=(150, 150, 150, 255), font_size=21 * ((windowX + windowY) / (1440 + 900)),
                                     anchor_x='left', anchor_y='bottom')
         self.add(Bg('bg1.png'))
         self.add(PacBall('left', 0.3))
