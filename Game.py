@@ -440,32 +440,24 @@ class MoveBall(cocos.actions.Move):
         if ballCollidingL:
             ballCollidingL = False
             self.target.dx *= -1
-            self.target.x += 40 * (windowX / 1440)
+            self.target.x += abs(self.target.dx)*2
         if ballCollidingR:
             ballCollidingR = False
             self.target.dx *= -1
-            self.target.x -= 40 * (windowX / 1440)
+            self.target.x -= abs(self.target.dx)*2
         if paccollisionl:
             paclhp -= 25
             if self.target.dx < 0:
-                self.target.x -= (14 * (windowY / 900)) / (displayfrequency / 60)
+                self.target.x -= abs(self.target.dx)
             if self.target.dx > 0:
-                self.target.x += (14 * (windowY / 900)) / (displayfrequency / 60)
-            if self.target.dy < 0:
-                self.target.y -= (14 * (windowY / 900)) / (displayfrequency / 60)
-            if self.target.dy > 0:
-                self.target.y += (14 * (windowY / 900)) / (displayfrequency / 60)
+                self.target.x += abs(self.target.dx)
             paccollisionl = False
         if paccollisionr:
             pacrhp -= 25
             if self.target.dx < 0:
-                self.target.x -= (14 * (windowY / 900)) / (displayfrequency / 60)
+                self.target.x -= abs(self.target.dx)
             if self.target.dx > 0:
-                self.target.x += (14 * (windowY / 900)) / (displayfrequency / 60)
-            if self.target.dy < 0:
-                self.target.y -= (14 * (windowY / 900)) / (displayfrequency / 60)
-            if self.target.dy > 0:
-                self.target.y += (14 * (windowY / 900)) / (displayfrequency / 60)
+                self.target.x += abs(self.target.dx)
             paccollisionr = False
 
 
