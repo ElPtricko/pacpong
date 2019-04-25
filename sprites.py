@@ -11,7 +11,7 @@ class Paddle(cocos.sprite.Sprite):
         self.velocity = (0, 0)
         self.invert = False
         self.stop = False
-        self.scale_y = 1.8 * (windowY / 900)
+        self.scale_y = 1.7 * (windowY / 900)
         self.scale_x = 0.7 * (windowX / 1440)
         if side == 'left':
             self.position = 80 * (windowX / 1440), (windowY / 2)
