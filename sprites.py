@@ -1,3 +1,5 @@
+import random
+
 import cocos, cocos.collision_model as cm, cocos.euclid as eu, pyglet
 from cocos.actions import *
 from glvars import *
@@ -15,7 +17,7 @@ class Paddle(cocos.sprite.Sprite):
             self.position = 80 * (windowX / 1440), (windowY / 2)
         if side == 'right':
             self.position = windowX - 80 * (windowX / 1440), (windowY / 2)
-        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14.3 * (windowY / 900)) / (displayfrequency / 60),
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14.3 * (windowX / 1440)) / (displayfrequency / 60),
                                      self.height / 2)
 
 
@@ -46,13 +48,13 @@ class PacBall(cocos.sprite.Sprite):
         if side is 'left':
             self.image = pyglet.resource.animation('pacballred.gif', flip_x=True)
             self.position = (windowX / 4), (windowY / 2) + self.width / 4
-            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowY / 900)) / (displayfrequency / 60),
+            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowX / 1440)) / (displayfrequency / 60),
                                          abs(self.height * 2 / 3))
             self.anchor = -self.width * 2 / 7, self.height * 3 / 18
         if side is 'right':
             self.image = pyglet.resource.animation('pacballblue.gif')
             self.position = ((windowX / 4) * 3, windowY / 2 + self.width / 4)
-            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowY / 900)) / (displayfrequency / 60),
+            self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14 * (windowX / 1440)) / (displayfrequency / 60),
                                          abs(self.height * 2 / 3))
             self.anchor = self.width * 2 / 7, self.height * 3 / 18
 
@@ -81,8 +83,13 @@ class SpeedUp(cocos.sprite.Sprite):
 
 
 class Bg(cocos.sprite.Sprite):
-    def __init__(self, img):
-        super().__init__(pyglet.resource.image(img))
+    def __init__(self):
+        super().__init__('bgorange.png')
+        randnum = random.randrange(1, 3)
+        if randnum is 1:
+            self.image = pyglet.resource.image('bgorange.png')
+        elif randnum is 2:
+            self.image = pyglet.resource.image('bgpurple.png')
         self.scale_x = windowX / self.width
         self.scale_y = windowY / self.height
         self.position = windowX / 2, (windowY / 2)
@@ -91,9 +98,9 @@ class Bg(cocos.sprite.Sprite):
 class PowersIndicator(cocos.sprite.Sprite):
     def __init__(self):
         super().__init__(pyglet.resource.image('powers.png'))
-        self.scale_x = 0.32
-        self.scale_y = 0.35
-        self.position = (windowX / 2, self.height / 2 + 20)
+        self.scale_x = 0.32 * (windowX / 1440)
+        self.scale_y = 0.35 * (windowX / 1440)
+        self.position = (windowX / 2, self.height / 2 + (20 * (windowY / 900)))
 
 
 class BackgroundLayer(cocos.layer.Layer):
@@ -118,7 +125,7 @@ class BackgroundLayer(cocos.layer.Layer):
                                     font_name=FN,
                                     color=(150, 150, 150, 255), font_size=21 * ((windowX + windowY) / (1440 + 900)),
                                     anchor_x='left', anchor_y='bottom')
-        self.add(Bg('bg1.png'))
+        self.add(Bg())
         self.add(PacBall('left', 0.3))
         self.add(PacBall('right', 0.3))
         self.add(cocos.layer.ColorLayer(0, 0, 0, 150, windowX, windowY))
@@ -131,11 +138,11 @@ class BackgroundLayer(cocos.layer.Layer):
         elif 'LEFT' in winner:
             win = cocos.text.Label('WINNER', (windowX * 1.3 / 8, windowY * 4 / 6), font_name=FN,
                                    color=(0, 200, 30, 255),
-                                   font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                   font_size=60 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
                                    anchor_y='center')
             lose = cocos.text.Label('LOSER', (windowX * 6.7 / 8, windowY * 4 / 6), font_name=FN,
                                     color=(200, 0, 10, 255),
-                                    font_size=50 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
+                                    font_size=60 * ((windowX + windowY) / (1440 + 900)), anchor_x='center',
                                     anchor_y='center')
             lose.rotation = 20
             win.rotation = -20

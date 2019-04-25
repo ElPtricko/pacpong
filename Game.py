@@ -1,4 +1,3 @@
-import random
 from cocos import director
 from cocos.menu import *
 from cocos.scene import Scene
@@ -10,19 +9,20 @@ from sprites import *
 class GameScene(cocos.layer.ColorLayer):
     is_event_handler = True
 
-    def __init__(self, practice=False, timer=False):
+    def __init__(self, practice=False):
         super(GameScene, self).__init__(0, 100, 175, 255)
         global paclhp, pacrhp, powerleft, powerright, left_points, right_points
         paclhp = 100.0
         pacrhp = 100.0
-        background = Bg('bg1.png')
         self.pointsl = cocos.text.Label('POINTS: 0', ((120 * (windowX / 1440)), 50 * (windowY / 900)),
                                         font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
-                                        color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
-        self.pointsr = cocos.text.Label('POINTS: 0', ((windowX - 120 * (windowX / 1440)),
-                                                      50 * (windowY / 900)),
+                                        color=(255, 255, 255, 255), anchor_x='center', anchor_y='center')
+        self.pointsr = cocos.text.Label('POINTS: 0', ((windowX - 120 * (windowX / 1440)), 50 * (windowY / 900)),
                                         font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
-                                        color=(0, 0, 0, 255), anchor_x='center', anchor_y='center')
+                                        color=(255, 255, 255, 255), anchor_x='center', anchor_y='center')
+        self.countdownlabel = cocos.text.Label('%d S' % 1, (windowX / 2, windowY * 9.5 / 11),
+                                               font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
+                                               color=(255, 255, 255, 255), anchor_x='center')
         if practice:
             left_points = 0
             right_points = -1
@@ -61,7 +61,7 @@ class GameScene(cocos.layer.ColorLayer):
         self.speed2 = SpeedUp()
         self.healthbar = HealthBar()
         self.power = PowerBar()
-        self.add(background)
+        self.add(Bg())
         self.add(self.paddleLeft)
         self.add(self.paddleRight)
         self.add(PowersIndicator())
@@ -78,21 +78,15 @@ class GameScene(cocos.layer.ColorLayer):
         self.add(self.speed2)
         self.add(self.healthbar)
         self.add(self.power)
+        self.add(self.countdownlabel)
         self.pointsl.do(PointslAction())
         self.pointsr.do(PointsrAction())
         self.paddleLeft.do(MovePaddleLeft())
         self.paddleRight.do(MovePaddleRight())
         self.pacleft.do(MovePacl())
-        self.GhostBall.do(MoveBall())
         self.pacright.do(MovePacr())
-        if timer is True:
-            self.countdownlabel = cocos.text.Label('%d S' % 4, (windowX / 2, windowY * 9.5 / 11),
-                                                   font_size=26 * ((windowX + windowY) / (1440 + 900)), font_name=FN,
-                                                   color=(0, 0, 0, 255), anchor_x='center')
-            self.countdownlabel.do(UpdateCountdown())
-            self.add(self.countdownlabel)
-        else:
-            pass
+        self.GhostBall.do(MoveBall())
+        self.countdownlabel.do(UpdateCountdown())
 
     def updateobj(self, dt):
         global ballCollidingL, ballCollidingR, paccollisionl, paccollisionr, powerright, powerleft, paclhp, pacrhp, time
@@ -122,7 +116,7 @@ class GameScene(cocos.layer.ColorLayer):
         elif -50 < pacrhp <= 0 < paclhp:
             pacrhp = -60
             director.director.push(FadeTransition(on_game_end('LEFT'), 2))
-        if -5 < time <= 0:
+        if -5 < time < 0:
             if paclhp * left_points == pacrhp * right_points:
                 director.director.push(FadeTransition(on_game_end('TIE'), 2))
             elif paclhp * left_points < pacrhp * right_points:
@@ -230,7 +224,7 @@ class PowerBar(cocos.layer.ColorLayer):
     def __init__(self):
         w, h = director.director.get_window_size()
         super(PowerBar, self).__init__(100, 100, 200, 0, width=w - int(6 * (w / 1440)), height=int(40 * (h / 900)))
-        self.position = (3 * (w / 1440), h - int(86 * (h / 900)))
+        self.position = (3 * (w / 1440), h - (86 * (h / 900)))
         self.progressbar = ProgressPowerBar(self.width // 2 - 2, int(40 * (h / 900)))
         self.progressbar.position = 0, 0
         self.progressbar2 = ProgressPowerBar(self.width // 2 - 2, int(40 * (h / 900)))
@@ -810,11 +804,14 @@ class MainMenu(Menu):
 
 
 def practice_mode_start():
+    global time
+    time = 0
     practice = Scene()
-    practice.add(GameScene(True, False))
-    practice.schedule_interval(GameScene(True, False).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
+    practice.add(GameScene(True))
+    practice.schedule_interval(GameScene(True).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
     practice.schedule_interval(update_powerbar, 1 / 20)
     practice.schedule_interval(practice_mode, 1 / 20)
+    practice.schedule_interval(countup_mode, 1 / 10)
     director.director.push(MoveInLTransition(practice, 1))
 
 
@@ -822,18 +819,21 @@ def countdown_mode_start():
     global time
     time = 1800
     countdown = Scene()
-    countdown.add(GameScene(False, True))
-    countdown.schedule_interval(GameScene(False, True).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
+    countdown.add(GameScene(False))
+    countdown.schedule_interval(GameScene(False).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
     countdown.schedule_interval(update_powerbar, 1 / 20)
     countdown.schedule_interval(countdown_mode, 1 / 10)
     director.director.push(MoveInTTransition(countdown, 1))
 
 
 def infinite_mode_start():
+    global time
+    time = 0
     infinite = Scene()
-    infinite.add(GameScene(False, False))
-    infinite.schedule_interval(GameScene(False, False).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
+    infinite.add(GameScene(False))
+    infinite.schedule_interval(GameScene(False).updateobj, (1 / 60) / (displayfrequency / 144) * 1.55)
     infinite.schedule_interval(update_powerbar, 1 / 20)
+    infinite.schedule_interval(countup_mode, 1 / 10)
     director.director.push(MoveInRTransition(infinite, 1))
 
 
@@ -875,3 +875,8 @@ def practice_mode(dt):
 def countdown_mode(dt):
     global time
     time -= 1
+
+
+def countup_mode(dt):
+    global time
+    time += 1
