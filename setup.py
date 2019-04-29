@@ -23,6 +23,6 @@ if sys.platform == "win32":
 
 setup(options={"build_exe": build_exe_options},
       name='PacPong',
-      version='0.1',
+      version='1',
       description='PacPong',
       executables=[Executable("main.py", base=base)])
