@@ -34,7 +34,8 @@ class GhostBall(cocos.sprite.Sprite):
             self.dx = (14.4 * (windowX / 1440)) / (displayfrequency / 60)
             self.position = (windowX - 50 * (windowX / 1440)), (windowY / 2)
         self.dy = (14.4 * (windowY / 900)) / (displayfrequency / 60)
-        self.cshape = cm.CircleShape(eu.Vector2(*self.position), self.width / 2)
+        self.cshape = cm.AARectShape(eu.Vector2(*self.position), (14*(windowX/1440))/(displayfrequency/60),
+                                     abs(self.height*2/3))
         self.do(Repeat(RotateBy(15, 0.05) + RotateBy(-30, 0.1) + RotateBy(15, 0.05)))
 
 

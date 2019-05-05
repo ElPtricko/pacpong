@@ -45,7 +45,7 @@ else:
 
 
 def calculate_seconds(balldx, seconds):
-    ballsmth = 60*balldx*seconds
+    ballsmth = displayfrequency*balldx*seconds
     return abs(ballsmth)
 
 
